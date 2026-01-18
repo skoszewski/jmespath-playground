@@ -8,9 +8,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "serve": "serve -s build -l 3000",
-    "docker:build": "docker build -t jmespath-playground .",
-    "docker:run": "docker run -p 3000:3000 jmespath-playground"
+    "serve": "serve -s build -l 3000"
   },
   "engines": {
     "node": ">=24.0.0"

@@ -79,34 +79,6 @@ Built with React 18 and targets:
 - Node.js 24 LTS compatibility
 - Mobile-responsive design
 
-## CI/CD Pipeline
+## License
 
-### GitHub Actions Workflow
-
-The project includes automated container building via GitHub Actions:
-
-**Triggers:**
-- Push to `main` or `develop` branches
-- Changes in `src/`, `public/`, `package*.json`, or container files
-- Pull requests to `main` branch
-
-**Pipeline Steps:**
-1. Checkout code and setup Node.js 24 LTS
-2. Install dependencies with npm ci
-3. Run test suite with coverage
-4. Build React production bundle
-5. Build and test Docker container
-6. Upload build artifacts
-7. Create multi-platform images (main branch only)
-
-**Local Testing:**
-```bash
-# Test the same steps locally
-npm ci
-npm test -- --coverage --watchAll=false
-npm run build
-npm run docker:build
-npm run docker:run
-```
-
-The workflow uses Docker for consistent containerization across all environments.
+MIT License - see LICENSE file for details.

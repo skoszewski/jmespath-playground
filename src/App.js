@@ -229,6 +229,13 @@ function App() {
                     Load Sample
                   </button>
                   <button 
+                    className="btn btn-outline-secondary btn-sm me-2" 
+                    onClick={formatJson}
+                    title="Format JSON input for better readability"
+                  >
+                    Format JSON
+                  </button>
+                  <button 
                     className="btn btn-outline-danger btn-sm" 
                     onClick={clearAll}
                     title="Clear all inputs"
@@ -257,18 +264,11 @@ function App() {
           {/* Bottom Row - JSON Input and Results */}
           <div className="col-md-6 mb-3">
             <div className="card h-100">
-              <div className="card-header d-flex justify-content-between align-items-center">
+              <div className="card-header">
                 <h5 className="mb-0">
                   <i className="bi bi-file-code me-2"></i>
                   JSON Data
                 </h5>
-                <button 
-                  className="btn btn-outline-secondary btn-sm" 
-                  onClick={formatJson}
-                  title="Format JSON"
-                >
-                  Format JSON
-                </button>
               </div>
               <div className="card-body input-section">
                 <div className="textarea-container">

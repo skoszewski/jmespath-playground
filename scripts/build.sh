@@ -30,19 +30,20 @@ npm install
 echo "🔨 Building production bundle..."
 npm run build
 
-# Container build with Docker
+# Optional container build with Docker
 if command -v docker &> /dev/null; then
-    echo "🐳 Building Docker container..."
+    echo "🐳 Building Docker container (optional)..."
     docker build -t jmespath-playground .
 else
-    echo "⚠️  Docker not found. Skipping container build."
-    echo "   Install Docker to build containers."
+    echo "💡 Docker not found. Container build is optional."
+    echo "   Install Docker if you want to build containers."
 fi
 
 echo "✅ Build completed successfully!"
 echo ""
 echo "To run the application:"
 echo "  npm run serve          # Serve production build locally"
+echo "  docker run -p 3000:3000 jmespath-playground  # Run container (if built)"
 if command -v docker &> /dev/null; then
     echo "  docker run -p 3000:3000 jmespath-playground  # Run with Docker"
 fi

@@ -16,7 +16,6 @@ A React-based web application for testing and validating JMESPath expressions ag
 - 📱 **Responsive Design**: Works on desktop, tablet, and mobile devices
 - 🐳 **Docker Ready**: Containerized for easy deployment
 - ✅ **Error Handling**: Clear error messages for both JSON and JMESPath syntax issues
-- 🚀 **CI/CD Ready**: GitHub Actions workflow for automated container builds
 
 ## Application Layout
 
@@ -55,9 +54,9 @@ The application is divided into three main sections:
 
 4. **Open your browser** and navigate to `http://localhost:3000`
 
-### Container Deployment
+### Container Deployment (Optional)
 
-#### Docker
+You can optionally run the application in a Docker container:
 
 ```bash
 # Build the Docker image
@@ -65,10 +64,6 @@ docker build -t jmespath-playground .
 
 # Run the container
 docker run -p 3000:3000 jmespath-playground
-
-# Using npm scripts
-npm run docker:build
-npm run docker:run
 ```
 
 ## Usage
@@ -165,51 +160,7 @@ jmespath-playground/
 - **Bootstrap 5.3.2**: CSS framework for styling
 - **JMESPath 0.16.0**: JMESPath expression evaluation
 - **Node.js 24 LTS**: Runtime environment
-- **Docker**: Containerization
-- **GitHub Actions**: Automated CI/CD pipeline
-
-## CI/CD Pipeline
-
-The project includes a GitHub Actions workflow that automatically:
-
-- 🔍 **Triggers** on pushes to `main` or `develop` branches when `src/` directory changes
-- 📦 **Builds** the React application with Node.js 24 LTS
-- 🧪 **Runs** the test suite with coverage reporting
-- 🐳 **Creates** container image using Docker
-- ✅ **Tests** the container by starting it and verifying HTTP response
-- 🏗️ **Builds** multi-platform images (amd64/arm64) for main branch
-- 📤 **Uploads** build artifacts for later use
-
-The workflow uses Docker for containerization and is optimized for cross-platform deployment.
-
-## Deployment
-
-### Docker Deployment
-
-The application is containerized and ready for deployment:
-
-1. **Build the Docker image**:
-   ```bash
-   docker build -t jmespath-playground .
-   ```
-
-2. **Deploy to your container platform** (Docker Swarm, Kubernetes, etc.)
-
-### Static Hosting
-
-You can also deploy the built application to static hosting services:
-
-1. **Build the application**:
-   ```bash
-   npm run build
-   ```
-
-2. **Deploy the `build` folder** to services like:
-   - Netlify
-   - Vercel
-   - GitHub Pages
-   - AWS S3 + CloudFront
-   - Azure Static Web Apps
+- **Docker**: Optional containerization
 
 ## Contributing
 
