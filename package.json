@@ -1,0 +1,62 @@
+{
+  "name": "jmespath-playground",
+  "version": "1.0.0",
+  "description": "A React-based web application for testing JMESPath expressions against JSON data",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "serve": "serve -s build -l 3000",
+    "dev": "./scripts/dev.sh",
+    "build:macos": "./scripts/build.sh",
+    "container:build": "container build -t jmespath-playground .",
+    "container:run": "container run -p 3000:3000 jmespath-playground",
+    "docker:build": "docker build -t jmespath-playground .",
+    "docker:run": "docker run -p 3000:3000 jmespath-playground"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.5.1",
+    "bootstrap": "^5.3.2",
+    "jmespath": "^0.16.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1",
+    "serve": "^14.2.1",
+    "web-vitals": "^3.5.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "keywords": [
+    "jmespath",
+    "json",
+    "query",
+    "testing",
+    "react",
+    "macos"
+  ],
+  "author": "",
+  "license": "MIT"
+}
