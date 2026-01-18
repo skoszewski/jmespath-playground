@@ -119,7 +119,7 @@ function App() {
   const loadFromDisk = () => {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = '.json,.txt';
+    fileInput.accept = '.json,.log';
     fileInput.onchange = (event) => {
       const file = event.target.files[0];
       if (file) {
