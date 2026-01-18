@@ -283,7 +283,7 @@ function App() {
               <div className="card-body d-flex flex-column" style={{ minHeight: 0 }}>
                 <div className="flex-grow-1" style={{ minHeight: 0 }}>
                   <textarea
-                    className={`form-control h-100 json-input ${jsonError ? 'error' : ''}`}
+                    className="form-control h-100 json-input"
                     value={jsonData}
                     onChange={handleJsonChange}
                     placeholder="Enter JSON data here..."
@@ -311,7 +311,7 @@ function App() {
               <div className="card-body d-flex flex-column" style={{ minHeight: 0 }}>
                 <div className="flex-grow-1" style={{ minHeight: 0 }}>
                   <textarea
-                    className={`form-control h-100 result-output ${result && !error && !jsonError ? 'success' : ''}`}
+                    className="form-control h-100 result-output"
                     value={result}
                     readOnly
                     placeholder="Results will appear here..."

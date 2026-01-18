@@ -7,6 +7,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Layout structure */
@@ -17,6 +18,7 @@ body {
 /* Header section styling - more compact */
 .header-section {
   /* Removed gradient background to fix text visibility */
+  transition: background-color 0.3s ease;
 }
 
 /* Custom card styling */
@@ -24,12 +26,15 @@ body {
   border: none;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   border-radius: 8px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-header {
   background-color: #f8f9fa;
   border-bottom: 2px solid #dee2e6;
   font-weight: 600;
+  color: #212529;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 /* Input and textarea styling */
@@ -38,6 +43,10 @@ body {
   font-size: 14px;
   padding: 10px;
   font-weight: 400;
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  color: #495057;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .json-input, .result-output {
@@ -45,18 +54,10 @@ body {
   font-size: 13px;
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
+  color: #495057;
   font-weight: 400;
   line-height: 1.4;
-}
-
-.json-input.error {
-  border-color: #dc3545;
-  background-color: #fff5f5;
-}
-
-.result-output.success {
-  border-color: #28a745;
-  background-color: #f0fff4;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 /* Button styling */
@@ -103,5 +104,148 @@ footer a:hover {
   
   .card-body textarea {
     min-height: 300px !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1a1a1a;
+    color: #e9ecef;
+  }
+
+  .header-section {
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #404040;
+  }
+
+  .card {
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    color: #e9ecef;
+  }
+
+  .card-header {
+    background-color: #3a3a3a;
+    border-bottom: 2px solid #505050;
+    color: #f8f9fa;
+  }
+
+  .jmespath-input {
+    background-color: #3a3a3a;
+    border: 1px solid #505050;
+    color: #f8f9fa;
+  }
+
+  .jmespath-input::placeholder {
+    color: #adb5bd;
+  }
+
+  .jmespath-input:focus {
+    background-color: #404040;
+    border-color: #007bff;
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  .json-input, .result-output {
+    background-color: #2a2a2a;
+    border: 1px solid #505050;
+    color: #e9ecef;
+  }
+
+  .json-input::placeholder, .result-output::placeholder {
+    color: #6c757d;
+  }
+
+  .json-input:focus, .result-output:focus {
+    background-color: #323232;
+    border-color: #007bff;
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  .alert-danger {
+    background-color: #3d1a1a;
+    border-color: #dc3545;
+    color: #f8d7da;
+  }
+
+  .text-muted {
+    color: #adb5bd !important;
+  }
+
+  footer {
+    background-color: #2d2d2d !important;
+    border-top: 1px solid #404040 !important;
+    color: #e9ecef;
+  }
+
+  footer .text-muted {
+    color: #adb5bd !important;
+  }
+
+  footer a {
+    color: #adb5bd;
+  }
+
+  footer a:hover {
+    color: #e9ecef;
+  }
+
+  /* Bootstrap dark mode overrides */
+  .btn-outline-success {
+    color: #28a745;
+    border-color: #28a745;
+  }
+
+  .btn-outline-success:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #fff;
+  }
+
+  .btn-outline-info {
+    color: #17a2b8;
+    border-color: #17a2b8;
+  }
+
+  .btn-outline-info:hover {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: #fff;
+  }
+
+  .btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+  }
+
+  .btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+  }
+
+  .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
   }
 }
