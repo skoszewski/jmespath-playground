@@ -180,32 +180,39 @@ function App() {
   };
 
   return (
-    <div className="container-fluid">
-      {/* Header Section */}
-      <div className="header-section">
+    <div className="container-fluid vh-100 d-flex flex-column">
+      {/* Top Section: Title only */}
+      <div className="header-section py-2">
         <div className="container">
           <div className="row">
             <div className="col-12 text-center">
-              <h1 className="display-4 mb-3">JMESPath Testing Tool</h1>
-              <p className="lead">
-                Validate and test JMESPath expressions against JSON data in real-time.
-                Enter your JMESPath query and JSON data below to see the results instantly.
-              </p>
+              <h2 className="mb-1">JMESPath Testing Tool</h2>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container-fluid content-section">
-        <div className="row h-100">
-          {/* JMESPath Expression Input - Middle Section */}
-          <div className="col-12 mb-3">
+      {/* Main Content Section - flex-grow to fill space */}
+      <div className="container-fluid flex-grow-1 d-flex flex-column" style={{ minHeight: 0 }}>
+        {/* Description paragraph */}
+        <div className="row mb-2">
+          <div className="col-12">
+            <p className="text-muted text-center mb-2 small">
+              Validate and test JMESPath expressions against JSON data in real-time.
+              Enter your JMESPath query and JSON data below to see the results instantly.
+            </p>
+          </div>
+        </div>
+
+        {/* Middle Section: JMESPath Expression Input */}
+        <div className="row mb-2">
+          <div className="col-12">
             <div className="card">
-              <div className="card-header d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">
+              <div className="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 className="mb-0">
                   <i className="bi bi-search me-2"></i>
                   JMESPath Expression
-                </h5>
+                </h6>
                 <div>
                   <button 
                     className="btn btn-outline-success btn-sm me-2" 
@@ -260,50 +267,55 @@ function App() {
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Bottom Row - JSON Input and Results */}
-          <div className="col-md-6 mb-3">
+        {/* Lower Middle Sections: JSON Data (left) and Query Result (right) */}
+        <div className="row flex-grow-1" style={{ minHeight: 0 }}>
+          {/* Lower Middle Left Section: JSON Data Input */}
+          <div className="col-md-6">
             <div className="card h-100">
-              <div className="card-header">
-                <h5 className="mb-0">
+              <div className="card-header py-2">
+                <h6 className="mb-0">
                   <i className="bi bi-file-code me-2"></i>
                   JSON Data
-                </h5>
+                </h6>
               </div>
-              <div className="card-body input-section">
-                <div className="textarea-container">
+              <div className="card-body d-flex flex-column" style={{ minHeight: 0 }}>
+                <div className="flex-grow-1" style={{ minHeight: 0 }}>
                   <textarea
-                    className={`form-control json-input ${jsonError ? 'error' : ''}`}
+                    className={`form-control h-100 json-input ${jsonError ? 'error' : ''}`}
                     value={jsonData}
                     onChange={handleJsonChange}
                     placeholder="Enter JSON data here..."
+                    style={{ minHeight: 0, resize: 'none' }}
                   />
-                  {jsonError && (
-                    <div className="alert alert-danger mt-2 mb-0">
-                      <small>{jsonError}</small>
-                    </div>
-                  )}
                 </div>
+                {jsonError && (
+                  <div className="alert alert-danger mt-1 mb-0 py-1">
+                    <small>{jsonError}</small>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Results Output - Bottom Right */}
-          <div className="col-md-6 mb-3">
+          {/* Lower Middle Right Section: Query Results Output */}
+          <div className="col-md-6">
             <div className="card h-100">
-              <div className="card-header">
-                <h5 className="mb-0">
+              <div className="card-header py-2">
+                <h6 className="mb-0">
                   <i className="bi bi-arrow-right-circle me-2"></i>
                   Query Result
-                </h5>
+                </h6>
               </div>
-              <div className="card-body output-section">
-                <div className="textarea-container">
+              <div className="card-body d-flex flex-column" style={{ minHeight: 0 }}>
+                <div className="flex-grow-1" style={{ minHeight: 0 }}>
                   <textarea
-                    className={`form-control result-output ${result && !error && !jsonError ? 'success' : ''}`}
+                    className={`form-control h-100 result-output ${result && !error && !jsonError ? 'success' : ''}`}
                     value={result}
                     readOnly
                     placeholder="Results will appear here..."
+                    style={{ minHeight: 0, resize: 'none' }}
                   />
                 </div>
               </div>
@@ -311,6 +323,27 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Bottom Section: Footer */}
+      <footer className="bg-light border-top mt-2 py-2 flex-shrink-0">
+        <div className="container">
+          <div className="row">
+            <div className="col-md-6">
+              <p className="mb-0 text-muted small">
+                <strong>JMESPath Testing Tool</strong> - Created for testing and validating JMESPath expressions
+              </p>
+            </div>
+            <div className="col-md-6 text-md-end">
+              <p className="mb-0 text-muted small">
+                Licensed under <a href="#" className="text-decoration-none">MIT License</a> | 
+                <a href="https://jmespath.org/" target="_blank" rel="noopener noreferrer" className="text-decoration-none ms-2">
+                  Learn JMESPath
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
