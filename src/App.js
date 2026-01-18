@@ -127,12 +127,35 @@ function App() {
         reader.onload = (e) => {
           try {
             const content = e.target.result;
-            // Try to parse as JSON to validate
-            JSON.parse(content);
-            setJsonData(content);
+            let jsonContent;
+            
+            // Handle .log files as sequences of JSON objects (JSON Lines format)
+            if (file.name.toLowerCase().endsWith('.log')) {
+              const lines = content.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+              
+              const jsonObjects = [];
+              for (const line of lines) {
+                try {
+                  const obj = JSON.parse(line);
+                  jsonObjects.push(obj);
+                } catch (lineError) {
+                  throw new Error(`Invalid JSON on line: "${line.substring(0, 50)}..." - ${lineError.message}`);
+                }
+              }
+              
+              jsonContent = JSON.stringify(jsonObjects, null, 2);
+            } else {
+              // Handle .json files as regular JSON
+              JSON.parse(content); // Validate JSON
+              jsonContent = content;
+            }
+            
+            setJsonData(jsonContent);
             setJsonError('');
           } catch (err) {
-            setJsonError(`Invalid JSON file: ${err.message}`);
+            setJsonError(`Invalid file content: ${err.message}`);
           }
         };
         reader.readAsText(file);
