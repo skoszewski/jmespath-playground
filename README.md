@@ -13,7 +13,7 @@ A React-based web application for testing and validating JMESPath expressions ag
 - 🎨 **Bootstrap UI**: Clean, responsive interface with Bootstrap styling
 - 🔄 **Sample Data**: Pre-loaded examples to get started quickly
 - 📱 **Responsive Design**: Works on desktop, tablet, and mobile devices
-- 🐳 **Container Ready**: Containerized for easy deployment (macOS + Docker)
+- 🐳 **Docker Ready**: Containerized for easy deployment
 - ✅ **Error Handling**: Clear error messages for both JSON and JMESPath syntax issues
 - 🚀 **CI/CD Ready**: GitHub Actions workflow for automated container builds
 
@@ -33,7 +33,6 @@ The application is divided into three main sections:
 
 - Node.js 24 LTS or higher
 - npm or yarn package manager
-- **macOS recommended** (optimized for Apple's container toolset)
 
 ### Local Development
 
@@ -48,10 +47,8 @@ The application is divided into three main sections:
    npm install
    ```
 
-3. **Start the development server** (macOS optimized):
+3. **Start the development server**:
    ```bash
-   npm run dev
-   # or traditional:
    npm start
    ```
 
@@ -59,22 +56,7 @@ The application is divided into three main sections:
 
 ### Container Deployment
 
-#### macOS with Apple Container (Recommended)
-
-```bash
-# Build using macOS-optimized script
-npm run build:macos
-
-# Or manually with Apple container command
-container build -t jmespath-playground .
-container run -p 3000:3000 jmespath-playground
-
-# Using npm scripts
-npm run container:build
-npm run container:run
-```
-
-#### Docker (Fallback Option)
+#### Docker
 
 ```bash
 # Build the Docker image
@@ -112,25 +94,13 @@ Try these examples with the sample data:
 
 In the project directory, you can run:
 
-### Development Scripts
-
-### `npm run dev`
-
-Starts the development server with macOS optimizations. Checks environment and opens the app at http://localhost:3000.
-
 ### `npm start`
 
-Runs the app in development mode using React's default development server. The page will reload when you make edits.
+Runs the app in development mode. The page will reload when you make edits.
 
 ### `npm test`
 
 Launches the test runner in interactive watch mode.
-
-### Build Scripts
-
-### `npm run build:macos`
-
-Builds the application and creates containers using macOS-optimized build script. Prioritizes Apple's container command with Docker fallback.
 
 ### `npm run build`
 
@@ -140,19 +110,11 @@ Builds the app for production to the `build` folder. It correctly bundles React 
 
 Serves the production build locally on port 3000.
 
-### Container Scripts
-
-### `npm run container:build`
-
-Builds a container using Apple's container command (macOS).
-
-### `npm run container:run`
-
-Runs the container using Apple's container command.
+### Docker Scripts
 
 ### `npm run docker:build`
 
-Builds a Docker container (fallback option).
+Builds a Docker container.
 
 ### `npm run docker:run`
 
@@ -179,10 +141,9 @@ jmespath-playground/
 │   ├── setupTests.js   # Test configuration
 │   └── reportWebVitals.js
 ├── scripts/
-│   ├── build.sh        # macOS-optimized build script
-│   └── dev.sh          # macOS-optimized development script
-├── Containerfile       # Apple container build file
-├── Dockerfile          # Docker container (fallback)
+│   ├── build.sh        # Build script
+│   └── dev.sh          # Development script
+├── Dockerfile          # Docker container
 ├── Dockerfile.dev      # Development container
 ├── docker-compose.yml  # Container orchestration
 ├── package.json        # Dependencies and scripts
@@ -197,8 +158,7 @@ jmespath-playground/
 - **Bootstrap 5.3.2**: CSS framework for styling
 - **JMESPath 0.16.0**: JMESPath expression evaluation
 - **Node.js 24 LTS**: Runtime environment
-- **Apple Container**: Primary containerization (macOS)
-- **Docker**: Containerization fallback
+- **Docker**: Containerization
 - **GitHub Actions**: Automated CI/CD pipeline
 
 ## CI/CD Pipeline
@@ -208,32 +168,18 @@ The project includes a GitHub Actions workflow that automatically:
 - 🔍 **Triggers** on pushes to `main` or `develop` branches when `src/` directory changes
 - 📦 **Builds** the React application with Node.js 24 LTS
 - 🧪 **Runs** the test suite with coverage reporting
-- 🐳 **Creates** container image using Docker (GitHub Actions environment)
+- 🐳 **Creates** container image using Docker
 - ✅ **Tests** the container by starting it and verifying HTTP response
 - 🏗️ **Builds** multi-platform images (amd64/arm64) for main branch
 - 📤 **Uploads** build artifacts for later use
 
-The workflow is optimized for the GitHub Actions environment while respecting the project's macOS-first philosophy for local development.
+The workflow uses Docker for containerization and is optimized for cross-platform deployment.
 
 ## Deployment
 
-### Container Deployment (macOS Recommended)
+### Docker Deployment
 
-The application is designed for macOS-first containerization:
-
-1. **Build using macOS toolset**:
-   ```bash
-   npm run build:macos
-   ```
-
-2. **Deploy using Apple container command**:
-   ```bash
-   container run -p 3000:3000 jmespath-playground
-   ```
-
-### Docker Deployment (Fallback)
-
-For environments without Apple's container toolset:
+The application is containerized and ready for deployment:
 
 1. **Build the Docker image**:
    ```bash

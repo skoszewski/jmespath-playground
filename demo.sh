@@ -1,18 +1,10 @@
 #!/bin/bash
 
 # JMESPath Testing Tool - Demo Script
-# Optimized for macOS with Apple container command
 
-echo "🍎 JMESPath Testing Tool Demo"
+echo "🚀 JMESPath Testing Tool Demo"
 echo "==============================="
 echo ""
-
-# Check if running on macOS
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "✅ Running on macOS (recommended platform)"
-else
-    echo "⚠️  Not running on macOS. This demo is optimized for macOS."
-fi
 
 # Check if Node.js is installed
 if command -v node &> /dev/null; then
@@ -30,16 +22,11 @@ else
     exit 1
 fi
 
-# Check container runtimes
-if command -v container &> /dev/null; then
-    echo "✅ Apple container command available"
+# Check Docker
+if command -v docker &> /dev/null; then
+    echo "✅ Docker available"
 else
-    echo "⚠️  Apple container command not found"
-    if command -v docker &> /dev/null; then
-        echo "✅ Docker available as fallback"
-    else
-        echo "⚠️  No container runtime found"
-    fi
+    echo "⚠️  Docker not found"
 fi
 
 echo ""
@@ -47,25 +34,22 @@ echo "📦 Installing dependencies..."
 npm install
 
 echo ""
-echo "🔨 Building with macOS-optimized script..."
-npm run build:macos
+echo "🔨 Building production version..."
+npm run build
 
 echo ""
 echo "🎉 Demo completed successfully!"
 echo ""
-echo "To start development (macOS optimized):"
-echo "  npm run dev"
-echo ""
-echo "To start development (traditional):"
+echo "To start development:"
 echo "  npm start"
 echo ""
 echo "To serve the production build:"
 echo "  npm run serve"
 echo ""
-echo "To run with containers:"
-if command -v container &> /dev/null; then
-    echo "  npm run container:run    # Apple container (recommended)"
-fi
+echo "To run with Docker:"
 if command -v docker &> /dev/null; then
-    echo "  npm run docker:run       # Docker (fallback)"
+    echo "  npm run docker:build"
+    echo "  npm run docker:run"
+else
+    echo "  (Docker not available - install Docker first)"
 fi

@@ -8,7 +8,6 @@ on:
       - 'public/**'
       - 'package*.json'
       - 'Dockerfile'
-      - 'Containerfile'
   pull_request:
     branches: [ main ]
     paths:
@@ -16,7 +15,6 @@ on:
       - 'public/**'
       - 'package*.json'
       - 'Dockerfile'
-      - 'Containerfile'
 
 env:
   IMAGE_NAME: jmespath-playground

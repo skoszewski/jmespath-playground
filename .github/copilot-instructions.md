@@ -24,9 +24,3 @@ Framework to be used:
 ## Containerization
 
 The application should be prepared for deployment using containerization. It should extend minimal Node 24 LTS container image.
-
-Do not assume the Docker is installed on the development machine.
-
-The development machine is a MacOS system with Apple `container` command from @github/apple/container.
-
-Build scripts should target MacOS with the above toolset as first class environment. Docker should be used only as secondary option.

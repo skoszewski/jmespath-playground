@@ -1,20 +1,12 @@
 #!/bin/bash
 
 # JMESPath Testing Tool - Development Script
-# Optimized for macOS development environment
 
 set -e
 
-echo "🍎 JMESPath Testing Tool - macOS Development"
-echo "==========================================="
+echo "🚀 JMESPath Testing Tool - Development"
+echo "====================================="
 echo ""
-
-# Check environment
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "✅ Running on macOS"
-else
-    echo "⚠️  This script is optimized for macOS but will attempt to run anyway."
-fi
 
 # Check Node.js
 if command -v node &> /dev/null; then

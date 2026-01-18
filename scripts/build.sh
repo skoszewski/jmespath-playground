@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # JMESPath Testing Tool - Build Script
-# Targets macOS with Apple container command as first-class environment
 
 set -e
 
-echo "🍎 JMESPath Testing Tool - macOS Build Script"
-echo "============================================="
+echo "🚀 JMESPath Testing Tool - Build Script"
+echo "======================================="
 echo ""
 
 # Check Node.js version
@@ -31,27 +30,19 @@ npm install
 echo "🔨 Building production bundle..."
 npm run build
 
-# Container build - prioritize Apple container command
-if command -v container &> /dev/null; then
-    echo "🍎 Building container with Apple container command..."
-    container build -t jmespath-playground .
+# Container build with Docker
+if command -v docker &> /dev/null; then
+    echo "🐳 Building Docker container..."
+    docker build -t jmespath-playground .
 else
-    # Fallback to Docker if available
-    if command -v docker &> /dev/null; then
-        echo "🐳 Apple container command not found, falling back to Docker..."
-        docker build -t jmespath-playground .
-    else
-        echo "⚠️  No container runtime found. Skipping container build."
-        echo "   Install Apple container command or Docker to build containers."
-    fi
+    echo "⚠️  Docker not found. Skipping container build."
+    echo "   Install Docker to build containers."
 fi
 
 echo "✅ Build completed successfully!"
 echo ""
 echo "To run the application:"
 echo "  npm run serve          # Serve production build locally"
-if command -v container &> /dev/null; then
-    echo "  container run -p 3000:3000 jmespath-playground  # Run with Apple container"
-elif command -v docker &> /dev/null; then
-    echo "  docker run -p 3000:3000 jmespath-playground     # Run with Docker"
+if command -v docker &> /dev/null; then
+    echo "  docker run -p 3000:3000 jmespath-playground  # Run with Docker"
 fi

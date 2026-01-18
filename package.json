@@ -9,10 +9,6 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "serve": "serve -s build -l 3000",
-    "dev": "./scripts/dev.sh",
-    "build:macos": "./scripts/build.sh",
-    "container:build": "container build -t jmespath-playground .",
-    "container:run": "container run -p 3000:3000 jmespath-playground",
     "docker:build": "docker build -t jmespath-playground .",
     "docker:run": "docker run -p 3000:3000 jmespath-playground"
   },
@@ -54,8 +50,7 @@
     "json",
     "query",
     "testing",
-    "react",
-    "macos"
+    "react"
   ],
   "author": "",
   "license": "MIT"

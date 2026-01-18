@@ -2,26 +2,10 @@
 
 ## Quick Start Commands
 
-### macOS Development (Recommended)
-
 ```bash
 # Install dependencies
 npm install
 
-# Start macOS-optimized development server
-npm run dev
-
-# Build with macOS toolset (Apple container + Docker fallback)
-npm run build:macos
-
-# Container operations (macOS)
-npm run container:build
-npm run container:run
-```
-
-### Traditional Commands
-
-```bash
 # Start development server (with hot reload)
 npm start
 
@@ -35,22 +19,7 @@ npm test
 npm run serve
 ```
 
-## Container Commands
-
-### Apple Container (Primary - macOS)
-
-```bash
-# Build container with Apple's container command
-container build -t jmespath-playground .
-
-# Run container
-container run -p 3000:3000 jmespath-playground
-
-# Using Containerfile (Apple's format)
-container build -f Containerfile -t jmespath-playground .
-```
-
-### Docker (Fallback)
+## Docker Commands
 
 ```bash
 # Build Docker container
@@ -140,4 +109,4 @@ npm run docker:build
 npm run docker:run
 ```
 
-The workflow uses Docker in the GitHub Actions environment while maintaining compatibility with the project's macOS-first development approach.
+The workflow uses Docker for consistent containerization across all environments.
