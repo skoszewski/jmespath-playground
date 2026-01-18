@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import jmespath from 'jmespath';
 import './App.css';
 
+// JMESPath Testing Tool - Main Application Component
 function App() {
   const [jmespathExpression, setJmespathExpression] = useState('people[0].name');
   const [jsonData, setJsonData] = useState(`{
