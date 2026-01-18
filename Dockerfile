@@ -23,4 +23,4 @@ RUN npm install -g serve
 EXPOSE 3000
 
 # Start the application using serve directly
-CMD ["serve", "-s", "build", "-l", "3000", "--host", "0.0.0.0"]
+CMD ["serve", "-s", "build", "-l", "3000"]
