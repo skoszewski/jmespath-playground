@@ -13,6 +13,8 @@ The application is single page. The page is divided into three sections:
 - Bottom left section: Input area for JSON data
 - Bottom right section: Output are for JMESPath query results
 
+The Middle section also contains a toolbar with buttons to load data from disk, load sample data, format JSON input, and clear all inputs.
+
 The main components of the application are located in the `src` directory and target Node 24 LTS environment.
 
 Framework to be used:

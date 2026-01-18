@@ -10,6 +10,7 @@ A React-based web application for testing and validating JMESPath expressions ag
 
 - 🎯 **Real-time Evaluation**: JMESPath expressions are evaluated instantly as you type
 - 📝 **JSON Validation**: Built-in JSON syntax validation and error reporting
+- 📁 **File Upload**: Load JSON data directly from local files
 - 🎨 **Bootstrap UI**: Clean, responsive interface with Bootstrap styling
 - 🔄 **Sample Data**: Pre-loaded examples to get started quickly
 - 📱 **Responsive Design**: Works on desktop, tablet, and mobile devices
@@ -73,11 +74,15 @@ npm run docker:run
 ## Usage
 
 1. **Enter a JMESPath expression** in the top input field (e.g., `people[*].name`)
-2. **Paste or type JSON data** in the bottom-left textarea
+2. **Add JSON data** using one of these methods:
+   - **Load from disk**: Click "📁 Load from Disk" to upload a JSON file
+   - **Paste or type**: Enter JSON data directly in the bottom-left textarea
+   - **Load sample**: Use the "Load Sample" button for quick testing
 3. **View the results** in the bottom-right output area
 4. **Use the toolbar buttons** to:
-   - Load sample data
-   - Format JSON
+   - Load JSON data from local files
+   - Load sample data for testing
+   - Format JSON for better readability
    - Clear all inputs
 
 ### Example JMESPath Expressions

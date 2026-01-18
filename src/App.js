@@ -116,6 +116,31 @@ function App() {
 }`);
   };
 
+  const loadFromDisk = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json,.txt';
+    fileInput.onchange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const content = e.target.result;
+            // Try to parse as JSON to validate
+            JSON.parse(content);
+            setJsonData(content);
+            setJsonError('');
+          } catch (err) {
+            setJsonError(`Invalid JSON file: ${err.message}`);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    fileInput.click();
+  };
+
   return (
     <div className="container-fluid">
       {/* Header Section */}
@@ -144,6 +169,13 @@ function App() {
                   JMESPath Expression
                 </h5>
                 <div>
+                  <button 
+                    className="btn btn-outline-success btn-sm me-2" 
+                    onClick={loadFromDisk}
+                    title="Load JSON from disk"
+                  >
+                    📁 Load from Disk
+                  </button>
                   <button 
                     className="btn btn-outline-primary btn-sm me-2" 
                     onClick={loadSample}
