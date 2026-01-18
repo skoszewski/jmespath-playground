@@ -9,9 +9,11 @@ The tool in this repository is designed to help users validate and test JMESPath
 The application is single page. The page is divided into three sections:
 
 - Top section: Title and description of the tool.
-- Middle section: Input area for JMESPath expressions
-- Bottom left section: Input area for JSON data
-- Bottom right section: Output are for JMESPath query results
+- Middle section:
+  - Input area for JMESPath expressions
+- Lower Middle left section: Input area for JSON data
+- Lower Middle right section: Output are for JMESPath query results
+- Boottom section: Footer with author and license information
 
 The Middle section also contains a toolbar with buttons to load data from disk, load sample data, format JSON input, and clear all inputs.
 

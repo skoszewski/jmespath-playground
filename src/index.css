@@ -65,6 +65,12 @@ code {
   color: white;
 }
 
+.btn-outline-info:hover {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+}
+
 .header-section {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;

@@ -75,14 +75,14 @@ npm run docker:run
 
 1. **Enter a JMESPath expression** in the top input field (e.g., `people[*].name`)
 2. **Add JSON data** using one of these methods:
-   - **Load from disk**: Click "📁 Load from Disk" to upload files
-     - `.json` files: Standard JSON format
-     - `.log` files: JSON Lines format (each line is a JSON object, automatically converted to array)
+   - **Load an Object**: Click "📄 Load an Object" to upload standard JSON files (.json)
+   - **Load a Log File**: Click "📋 Load a Log File" to upload JSON Lines files (.log) - each line converted to array
    - **Paste or type**: Enter JSON data directly in the bottom-left textarea
    - **Load sample**: Use the "Load Sample" button for quick testing
 3. **View the results** in the bottom-right output area
 4. **Use the toolbar buttons** to:
-   - Load JSON data from local files
+   - Load JSON objects from standard .json files
+   - Load log files from JSON Lines .log files (auto-converted to arrays)
    - Load sample data for testing
    - Format JSON for better readability
    - Clear all inputs

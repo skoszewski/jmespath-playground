@@ -119,7 +119,7 @@ function App() {
   const loadFromDisk = () => {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = '.json,.log';
+    fileInput.accept = '.json';
     fileInput.onchange = (event) => {
       const file = event.target.files[0];
       if (file) {
@@ -127,35 +127,50 @@ function App() {
         reader.onload = (e) => {
           try {
             const content = e.target.result;
-            let jsonContent;
+            // Handle .json files as regular JSON
+            JSON.parse(content); // Validate JSON
+            setJsonData(content);
+            setJsonError('');
+          } catch (err) {
+            setJsonError(`Invalid JSON file: ${err.message}`);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    fileInput.click();
+  };
+
+  const loadLogFile = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.log';
+    fileInput.onchange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const content = e.target.result;
+            const lines = content.split('\n')
+              .map(line => line.trim())
+              .filter(line => line.length > 0);
             
-            // Handle .log files as sequences of JSON objects (JSON Lines format)
-            if (file.name.toLowerCase().endsWith('.log')) {
-              const lines = content.split('\n')
-                .map(line => line.trim())
-                .filter(line => line.length > 0);
-              
-              const jsonObjects = [];
-              for (const line of lines) {
-                try {
-                  const obj = JSON.parse(line);
-                  jsonObjects.push(obj);
-                } catch (lineError) {
-                  throw new Error(`Invalid JSON on line: "${line.substring(0, 50)}..." - ${lineError.message}`);
-                }
+            const jsonObjects = [];
+            for (const line of lines) {
+              try {
+                const obj = JSON.parse(line);
+                jsonObjects.push(obj);
+              } catch (lineError) {
+                throw new Error(`Invalid JSON on line: "${line.substring(0, 50)}..." - ${lineError.message}`);
               }
-              
-              jsonContent = JSON.stringify(jsonObjects, null, 2);
-            } else {
-              // Handle .json files as regular JSON
-              JSON.parse(content); // Validate JSON
-              jsonContent = content;
             }
             
+            const jsonContent = JSON.stringify(jsonObjects, null, 2);
             setJsonData(jsonContent);
             setJsonError('');
           } catch (err) {
-            setJsonError(`Invalid file content: ${err.message}`);
+            setJsonError(`Invalid log file: ${err.message}`);
           }
         };
         reader.readAsText(file);
@@ -195,9 +210,16 @@ function App() {
                   <button 
                     className="btn btn-outline-success btn-sm me-2" 
                     onClick={loadFromDisk}
-                    title="Load JSON from disk"
+                    title="Load JSON object from file"
                   >
-                    📁 Load from Disk
+                    📄 Load an Object
+                  </button>
+                  <button 
+                    className="btn btn-outline-info btn-sm me-2" 
+                    onClick={loadLogFile}
+                    title="Load JSON Lines log file"
+                  >
+                    📋 Load a Log File
                   </button>
                   <button 
                     className="btn btn-outline-primary btn-sm me-2" 
