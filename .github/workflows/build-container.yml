@@ -53,16 +53,34 @@ jobs:
         context: .
         file: ./Dockerfile
         push: false
+        load: true
         tags: ${{ env.IMAGE_NAME }}:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
     - name: Test container
       run: |
+        # Start the container
         docker run --rm -d -p 3000:3000 --name test-container ${{ env.IMAGE_NAME }}:latest
-        sleep 10
-        # Test if the container is responding
-        curl -f http://localhost:3000 || exit 1
+        
+        # Wait for container to be ready
+        echo "Waiting for container to start..."
+        for i in {1..30}; do
+          if curl -f http://localhost:3000 > /dev/null 2>&1; then
+            echo "Container is responding!"
+            break
+          fi
+          if [ $i -eq 30 ]; then
+            echo "Container failed to respond within 30 seconds"
+            docker logs test-container
+            docker stop test-container
+            exit 1
+          fi
+          echo "Attempt $i/30 - waiting..."
+          sleep 2
+        done
+        
+        # Test successful, stop container
         docker stop test-container
 
     - name: Upload build artifacts
