@@ -41,6 +41,7 @@ npm test -- --watchAll=false
 
 echo ""
 echo "🔨 Building React application..."
+echo "  (Version will be automatically tagged as -dev since not building from git tag)"
 npm run build
 
 echo ""

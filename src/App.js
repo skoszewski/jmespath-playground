@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import jmespath from 'jmespath';
-import packageJson from '../package.json';
+import { VERSION } from './version';
 import './App.css';
 
 // JMESPath Testing Tool - Main Application Component
@@ -457,7 +457,7 @@ function App() {
           <div className="row">
             <div className="col-md-6">
               <p className="mb-0 text-muted small">
-                <strong>JMESPath Testing Tool</strong> v{packageJson.version} - Created for testing and validating JMESPath expressions
+                <strong>JMESPath Testing Tool</strong> v{VERSION} - Created for testing and validating JMESPath expressions
               </p>
             </div>
             <div className="col-md-6 text-md-end">
