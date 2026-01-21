@@ -24,29 +24,28 @@ Framework to be used:
 - React for building the user interface.
 - JavaScript (ES6+) for scripting.
 - Bootstrap for styling and layout.
+- Express.js for serving the application and handling API requests.
+
+The server code is only used as a bridge between the UI app and the external tools that may upload the sample data. The server does not perform any JMESPath evaluation or JSON parsing; all such logic is handled in the React application.
+
+The server keeps two pieces of information in memory:
+
+1. The sample data itself.
+2. A state variable (a GUID) that changes whenever new sample data is uploaded.
+
+The React application load the sample data at startup and periodically checks the state variable to see if new sample data is available. If state variable changes, the React app fetches the new sample data and the state variable again.
 
 ### API
 
-The application exposes a REST API for uploading JSON files and retrieving JMESPath evaluation results with query expression. The API endpoints are as follows:
+The application exposes a REST API for remotly uploading sample data. The API endpoints are as follows:
 
-- `POST /api/v1/upload`: Accepts a JSON with the following structure:
-  ```json
-  {
-    "jmespath": "<JMESPath expression>",
-    "jsondata": "<JSON data>"
-  }
-  ```
-  The application should reload the JMESPath expression and JSON data UI elements with the provided data and respond OK if successful.
+- `POST /api/v1/upload`: The sample data is sent in the request body as JSON.
 
-- `GET /api/v1/result` - Returns the result of evaluating the current JMESPath expression against the current JSON data in the UI. The response should be a JSON object with the following structure:
-  ```json
-  {
-    "jmespath": "<JMESPath expression>",
-    "jsondata": "<JSON data>",
-    "result": "<JMESPath evaluation result>",
-    "error": "<Error message if any>"
-  }
-  ```
+  The server stores the sample data in memory and generates a new value for its state variable (a guid).
+
+- `GET /api/v1/sample`: Returns the currently stored sample data as JSON.
+
+- `GET /api/v1/state`: Returns the current value of the state variable (a guid) as a string.
 
 ## Containerization
 
