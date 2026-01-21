@@ -391,7 +391,7 @@ function App() {
             </div>
             <div className="col-md-6 text-md-end">
               <p className="mb-0 text-muted small">
-                Licensed under <a href="#" className="text-decoration-none">MIT License</a> | 
+                Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="text-decoration-none">MIT License</a> | 
                 <a href="https://jmespath.org/" target="_blank" rel="noopener noreferrer" className="text-decoration-none ms-2">
                   Learn JMESPath
                 </a>
