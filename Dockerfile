@@ -31,8 +31,14 @@ RUN if [ -n "$VERSION" ]; then \
       echo "📝 Generated version.js with VERSION=$VERSION, IS_RELEASE=$IS_RELEASE"; \
     fi
 
-# Build the application
-RUN npm run build
+# Build the application (skip prebuild if we already generated version.js)
+RUN if [ -n "$VERSION" ]; then \
+      echo "🚀 Building with pre-generated version.js" && \
+      npx react-scripts build; \
+    else \
+      echo "🚀 Building with version-check.js" && \
+      npm run build; \
+    fi
 
 # Production stage
 FROM node:24-alpine AS production
