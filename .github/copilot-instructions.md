@@ -25,6 +25,29 @@ Framework to be used:
 - JavaScript (ES6+) for scripting.
 - Bootstrap for styling and layout.
 
+### API
+
+The application exposes a REST API for uploading JSON files and retrieving JMESPath evaluation results with query expression. The API endpoints are as follows:
+
+- `POST /api/v1/upload`: Accepts a JSON with the following structure:
+  ```json
+  {
+    "jmespath": "<JMESPath expression>",
+    "jsondata": "<JSON data>"
+  }
+  ```
+  The application should reload the JMESPath expression and JSON data UI elements with the provided data and respond OK if successful.
+
+- `GET /api/v1/result` - Returns the result of evaluating the current JMESPath expression against the current JSON data in the UI. The response should be a JSON object with the following structure:
+  ```json
+  {
+    "jmespath": "<JMESPath expression>",
+    "jsondata": "<JSON data>",
+    "result": "<JMESPath evaluation result>",
+    "error": "<Error message if any>"
+  }
+  ```
+
 ## Containerization
 
 The application should be prepared for deployment using containerization. It should extend minimal Node 24 LTS container image.
