@@ -4,18 +4,20 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 
 function showUsage() {
-    console.log('Usage: node scripts/new-version.js <version> [--force]');
+    console.log('Usage: node scripts/new-version.js <version> [--force] [-m|--message "commit message"]');
     console.log('       node scripts/new-version.js --check <version>');
     console.log('');
     console.log('Creates a new version by tagging the current commit.');
     console.log('');
     console.log('Options:');
-    console.log('  --force    Force version creation even with dirty repo or package.json mismatch');
-    console.log('  --check    Analyze repository status and report what would happen for specified version');
+    console.log('  --force              Force version creation even with dirty repo or package.json mismatch');
+    console.log('  --check              Analyze repository status and report what would happen for specified version');
+    console.log('  -m, --message TEXT   Custom commit message (only used when commit is needed)');
     console.log('');
     console.log('Example:');
     console.log('  node scripts/new-version.js 1.2.0');
     console.log('  node scripts/new-version.js 1.2.0 --force');
+    console.log('  node scripts/new-version.js 1.2.0 -m "Add new feature XYZ"');
     console.log('  node scripts/new-version.js --check 1.3.0');
 }
 
@@ -178,10 +180,17 @@ function main() {
     const isCheck = args.includes('--check');
     const isForce = args.includes('--force');
 
+    // Parse custom commit message
+    let customMessage = null;
+    const messageIndex = args.findIndex(arg => arg === '-m' || arg === '--message');
+    if (messageIndex !== -1 && messageIndex + 1 < args.length) {
+        customMessage = args[messageIndex + 1];
+    }
+    
     let newVersion;
     if (isCheck) {
         // For --check, version is required
-        newVersion = args.find(arg => !arg.startsWith('--'));
+        newVersion = args.find(arg => !arg.startsWith('--') && arg !== '-m' && arg !== customMessage);
         if (!newVersion) {
             console.error('Error: Version argument required for --check');
             showUsage();
@@ -189,11 +198,8 @@ function main() {
         }
     } else {
         // For normal operation, version is required
-        newVersion = args[0];
-        if (!newVersion || newVersion.startsWith('-')) {
-            console.error('Error: Version argument required');
-            showUsage();
-            process.exit(1);
+        newVersion = args.find(arg => !arg.startsWith('--') && arg !== '-m' && arg !== customMessage);
+        if (!newVersion) {
         }
     }
 
@@ -268,7 +274,7 @@ function main() {
             execSync('git add .', { stdio: 'inherit' });
 
             // Commit
-            const commitMessage = needsPackageUpdate ? `Version ${newVersion}` : `Prepare for version ${newVersion}`;
+            const commitMessage = customMessage || (needsPackageUpdate ? `Version ${newVersion}` : `Prepare for version ${newVersion}`);
             execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
             console.log(`✅ Committed changes`);
         } else {

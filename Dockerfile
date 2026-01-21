@@ -1,6 +1,10 @@
 # Build stage
 FROM node:24-alpine AS builder
 
+# Accept build arguments for version info
+ARG VERSION=""
+ARG IS_RELEASE="false"
+
 # Set working directory
 WORKDIR /app
 
@@ -15,6 +19,17 @@ COPY src/ ./src/
 COPY public/ ./public/
 COPY scripts/ ./scripts/
 COPY server.js ./server.js
+
+# Generate version.js if version info provided, otherwise run normal build
+RUN if [ -n "$VERSION" ]; then \
+      echo "// Auto-generated version file - do not edit manually" > src/version.js && \
+      echo "// Generated at: $(date -Iseconds)" >> src/version.js && \
+      echo "" >> src/version.js && \
+      echo "export const VERSION = '$VERSION';" >> src/version.js && \
+      echo "export const IS_RELEASE = $IS_RELEASE;" >> src/version.js && \
+      echo "export const BUILD_TIME = '$(date -Iseconds)';" >> src/version.js && \
+      echo "📝 Generated version.js with VERSION=$VERSION, IS_RELEASE=$IS_RELEASE"; \
+    fi
 
 # Build the application
 RUN npm run build
