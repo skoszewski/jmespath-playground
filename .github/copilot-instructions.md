@@ -33,7 +33,7 @@ The server keeps two pieces of information in memory:
 1. The sample data itself.
 2. A state variable (a GUID) that changes whenever new sample data is uploaded.
 
-The React application load the sample data at startup and periodically checks the state variable to see if new sample data is available. If state variable changes, the React app fetches the new sample data and the state variable again.
+The React application load the sample data at startup and periodically checks the state variable to see if new sample data is available. If state variable changes, the React app displays a button beneath the expression input area to reload the sample data. The reload is performed only when the user clicks the button.
 
 ### API
 
