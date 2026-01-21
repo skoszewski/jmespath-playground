@@ -96,13 +96,13 @@ code {
 
 /* Additional specificity for jmespath-input with error class */
 .theme-dark .jmespath-input.error {
-  background-color: var(--error-bg-dark) !important;
-  border-color: var(--error-border-dark) !important;
-  color: var(--error-text-dark) !important;
+  background-color: #4a1e1e !important;
+  border-color: #6d2c2c !important;
+  color: #f8d7da !important;
 }
 
 .theme-light .jmespath-input.error {
-  background-color: var(--error-bg-light) !important;
-  border-color: var(--error-border-light) !important;
-  color: var(--error-text-light) !important;
+  background-color: #f8d7da !important;
+  border-color: #f5c6cb !important;
+  color: #721c24 !important;
 }

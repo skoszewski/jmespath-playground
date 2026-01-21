@@ -33,12 +33,16 @@ function App() {
     // Apply theme to document
     const applyTheme = (selectedTheme) => {
       const root = document.documentElement;
-      root.className = ''; // Clear existing theme classes
+      const body = document.body;
+      
+      // Clear existing theme classes from both html and body
+      root.className = '';
+      body.classList.remove('theme-light', 'theme-dark');
       
       if (selectedTheme === 'light') {
-        root.classList.add('theme-light');
+        body.classList.add('theme-light');
       } else if (selectedTheme === 'dark') {
-        root.classList.add('theme-dark');
+        body.classList.add('theme-dark');
       }
       // 'auto' uses CSS media queries (no class needed)
     };
@@ -310,16 +314,14 @@ function App() {
               <div className="card-body">
                 <input
                   type="text"
-                  className={`form-control jmespath-input ${error ? 'error' : ''}`}
+                  className={`form-control jmespath-input ${error ? 'error' : 'success'}`}
                   value={jmespathExpression}
                   onChange={handleJmespathChange}
                   placeholder="Enter JMESPath expression (e.g., people[*].name)"
                 />
-                {error && (
-                  <div className="alert alert-danger mt-2 mb-0">
-                    <small>{error}</small>
-                  </div>
-                )}
+                <div className={`alert mt-2 mb-0 ${error ? 'alert-danger' : 'alert-success'}`}>
+                  <small>{error || 'Expression is correct'}</small>
+                </div>
               </div>
             </div>
           </div>
