@@ -7,14 +7,19 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (production only)
-RUN npm ci --only=production
+# Install dependencies (production + dev for build)
+RUN npm ci
 
-# Copy server code
+# Copy source code
+COPY src/ ./src/
+COPY public/ ./public/
 COPY server.js ./server.js
 
-# Copy built application
-COPY build/ ./build/
+# Build the application
+RUN npm run build
+
+# Remove dev dependencies to reduce image size
+RUN npm ci --only=production && npm cache clean --force
 
 # Expose port 3000
 EXPOSE 3000
