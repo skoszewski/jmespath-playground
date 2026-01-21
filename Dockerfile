@@ -7,20 +7,21 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (including serve for production)
-RUN npm ci
+# Install dependencies (production only)
+RUN npm ci --only=production
 
-# Copy application source
-COPY . .
+# Copy server code
+COPY server.js ./server.js
 
-# Build the application
-RUN npm run build
-
-# Install serve globally for production serving
-RUN npm install -g serve
+# Copy built application
+COPY build/ ./build/
 
 # Expose port 3000
 EXPOSE 3000
 
-# Start the application using serve directly
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Set LISTEN_ADDR to bind to all interfaces in container
+ENV LISTEN_ADDR=0.0.0.0
+ENV LISTEN_PORT=3000
+
+# Start the integrated server
+CMD ["node", "server.js"]

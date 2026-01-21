@@ -28,6 +28,8 @@ function App() {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [jsonError, setJsonError] = useState('');
+  const [showReloadButton, setShowReloadButton] = useState(false);
+  const [currentStateGuid, setCurrentStateGuid] = useState(null);
 
   // Theme management
   useEffect(() => {
@@ -35,11 +37,11 @@ function App() {
     const applyTheme = (selectedTheme) => {
       const root = document.documentElement;
       const body = document.body;
-      
+
       // Clear existing theme classes from both html and body
       root.className = '';
       body.classList.remove('theme-light', 'theme-dark');
-      
+
       if (selectedTheme === 'light') {
         body.classList.add('theme-light');
       } else if (selectedTheme === 'dark') {
@@ -51,6 +53,62 @@ function App() {
     applyTheme(theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // API polling for state changes
+  useEffect(() => {
+    // Initial state load
+    const loadInitialState = async () => {
+      try {
+        const response = await fetch('/api/v1/state');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentStateGuid(data.state);
+        }
+      } catch (error) {
+        console.debug('API not available:', error);
+      }
+    };
+
+    loadInitialState();
+
+    // Poll for state changes every 3 seconds
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch('/api/v1/state');
+        if (response.ok) {
+          const data = await response.json();
+          if (currentStateGuid && data.state !== currentStateGuid) {
+            setShowReloadButton(true);
+          }
+        }
+      } catch (error) {
+        console.debug('API not available:', error);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentStateGuid]);
+
+  // Load sample data from API
+  const loadSampleData = async () => {
+    try {
+      setShowReloadButton(false);
+      const response = await fetch('/api/v1/sample');
+      if (response.ok) {
+        const data = await response.json();
+        setJsonData(JSON.stringify(data, null, 2));
+
+        // Update current state GUID
+        const stateResponse = await fetch('/api/v1/state');
+        if (stateResponse.ok) {
+          const stateData = await stateResponse.json();
+          setCurrentStateGuid(stateData.state);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load sample data:', error);
+    }
+  };
 
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
@@ -74,7 +132,7 @@ function App() {
 
       // Evaluate JMESPath expression
       const queryResult = jmespath.search(parsedData, jmespathExpression);
-      
+
       // Format the result
       if (queryResult === null || queryResult === undefined) {
         setResult('null');
@@ -187,7 +245,7 @@ function App() {
             const lines = content.split('\n')
               .map(line => line.trim())
               .filter(line => line.length > 0);
-            
+
             const jsonObjects = [];
             for (const line of lines) {
               try {
@@ -197,7 +255,7 @@ function App() {
                 throw new Error(`Invalid JSON on line: "${line.substring(0, 50)}..." - ${lineError.message}`);
               }
             }
-            
+
             const jsonContent = JSON.stringify(jsonObjects, null, 2);
             setJsonData(jsonContent);
             setJsonError('');
@@ -222,24 +280,24 @@ function App() {
               {/* Theme switcher */}
               <div className="position-absolute top-0 end-0">
                 <div className="btn-group btn-group-sm" role="group" aria-label="Theme switcher">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className={`btn ${theme === 'auto' ? 'btn-primary' : 'btn-outline-secondary'}`}
                     onClick={() => handleThemeChange('auto')}
                     title="Auto (follow system)"
                   >
                     🌓 Auto
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className={`btn ${theme === 'light' ? 'btn-primary' : 'btn-outline-secondary'}`}
                     onClick={() => handleThemeChange('light')}
                     title="Light theme"
                   >
                     ☀️ Light
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className={`btn ${theme === 'dark' ? 'btn-primary' : 'btn-outline-secondary'}`}
                     onClick={() => handleThemeChange('dark')}
                     title="Dark theme"
@@ -275,36 +333,36 @@ function App() {
                   JMESPath Expression
                 </h6>
                 <div>
-                  <button 
-                    className="btn btn-outline-success btn-sm me-2" 
+                  <button
+                    className="btn btn-outline-success btn-sm me-2"
                     onClick={loadFromDisk}
                     title="Load JSON object from file"
                   >
                     📄 Load an Object
                   </button>
-                  <button 
-                    className="btn btn-outline-info btn-sm me-2" 
+                  <button
+                    className="btn btn-outline-info btn-sm me-2"
                     onClick={loadLogFile}
                     title="Load JSON Lines log file"
                   >
                     📋 Load a Log File
                   </button>
-                  <button 
-                    className="btn btn-outline-primary btn-sm me-2" 
+                  <button
+                    className="btn btn-outline-primary btn-sm me-2"
                     onClick={loadSample}
                     title="Load sample data"
                   >
                     Load Sample
                   </button>
-                  <button 
-                    className="btn btn-outline-secondary btn-sm me-2" 
+                  <button
+                    className="btn btn-outline-secondary btn-sm me-2"
                     onClick={formatJson}
                     title="Format JSON input for better readability"
                   >
                     Format JSON
                   </button>
-                  <button 
-                    className="btn btn-outline-danger btn-sm" 
+                  <button
+                    className="btn btn-outline-danger btn-sm"
                     onClick={clearAll}
                     title="Clear all inputs"
                   >
@@ -320,8 +378,18 @@ function App() {
                   onChange={handleJmespathChange}
                   placeholder="Enter JMESPath expression (e.g., people[*].name)"
                 />
-                <div className={`alert mt-2 mb-0 ${error ? 'alert-danger' : 'alert-success'}`}>
-                  <small>{error || 'Expression is correct'}</small>
+                <div className={`alert mt-2 mb-0 d-flex justify-content-between align-items-center ${error ? 'alert-danger' : 'alert-success'}`}>
+                  <small className="mb-0">{error || 'Expression is correct'}</small>
+                  {showReloadButton && (
+                    <button
+                      className="btn btn-light btn-sm ms-2 border"
+                      onClick={loadSampleData}
+                      title="New sample data is available"
+                    >
+                      <i className="bi bi-arrow-clockwise me-1"></i>
+                      Reload Sample Data
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -394,7 +462,7 @@ function App() {
             </div>
             <div className="col-md-6 text-md-end">
               <p className="mb-0 text-muted small">
-                Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="text-decoration-none">MIT License</a> | 
+                Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="text-decoration-none">MIT License</a> |
                 <a href="https://jmespath.org/" target="_blank" rel="noopener noreferrer" className="text-decoration-none ms-2">
                   Learn JMESPath
                 </a>

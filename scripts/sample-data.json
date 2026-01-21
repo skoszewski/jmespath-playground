@@ -1,0 +1,30 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice Johnson",
+      "email": "alice@example.com",
+      "role": "admin",
+      "skills": ["JavaScript", "Python", "SQL"]
+    },
+    {
+      "id": 2,
+      "name": "Bob Wilson",
+      "email": "bob@example.com", 
+      "role": "developer",
+      "skills": ["Java", "Spring", "React"]
+    },
+    {
+      "id": 3,
+      "name": "Carol Davis",
+      "email": "carol@example.com",
+      "role": "designer",
+      "skills": ["Figma", "Photoshop", "CSS"]
+    }
+  ],
+  "metadata": {
+    "total": 3,
+    "created": "2026-01-21",
+    "version": "1.0"
+  }
+}

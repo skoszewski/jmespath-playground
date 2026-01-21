@@ -7,8 +7,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "serve": "serve -s build -l 3000"
+    "server": "node server.js"
   },
   "engines": {
     "node": ">=24.0.0"
@@ -18,17 +17,23 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.5.1",
     "bootstrap": "^5.3.2",
+    "express": "^4.19.2",
     "jmespath": "^0.16.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "^5.0.1",
-    "serve": "^14.2.5",
-    "web-vitals": "^3.5.0"
+    "uuid": "^9.0.0"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
+    ]
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!src/index.js"
     ]
   },
   "browserslist": {
@@ -51,5 +56,8 @@
     "react"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
 }
