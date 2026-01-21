@@ -5,6 +5,10 @@ import './App.css';
 // JMESPath Testing Tool - Main Application Component
 function App() {
   const [jmespathExpression, setJmespathExpression] = useState('people[0].name');
+  const [theme, setTheme] = useState(() => {
+    // Load theme from localStorage or default to 'auto'
+    return localStorage.getItem('theme') || 'auto';
+  });
   const [jsonData, setJsonData] = useState(`{
   "people": [
     {
@@ -23,6 +27,29 @@ function App() {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [jsonError, setJsonError] = useState('');
+
+  // Theme management
+  useEffect(() => {
+    // Apply theme to document
+    const applyTheme = (selectedTheme) => {
+      const root = document.documentElement;
+      root.className = ''; // Clear existing theme classes
+      
+      if (selectedTheme === 'light') {
+        root.classList.add('theme-light');
+      } else if (selectedTheme === 'dark') {
+        root.classList.add('theme-dark');
+      }
+      // 'auto' uses CSS media queries (no class needed)
+    };
+
+    applyTheme(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+  };
 
   const evaluateExpression = () => {
     try {
@@ -185,8 +212,37 @@ function App() {
       <div className="header-section py-2">
         <div className="container">
           <div className="row">
-            <div className="col-12 text-center">
+            <div className="col-12 text-center position-relative">
               <h2 className="mb-1">JMESPath Testing Tool</h2>
+              {/* Theme switcher */}
+              <div className="position-absolute top-0 end-0">
+                <div className="btn-group btn-group-sm" role="group" aria-label="Theme switcher">
+                  <button 
+                    type="button" 
+                    className={`btn ${theme === 'auto' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    onClick={() => handleThemeChange('auto')}
+                    title="Auto (follow system)"
+                  >
+                    🌓 Auto
+                  </button>
+                  <button 
+                    type="button" 
+                    className={`btn ${theme === 'light' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    onClick={() => handleThemeChange('light')}
+                    title="Light theme"
+                  >
+                    ☀️ Light
+                  </button>
+                  <button 
+                    type="button" 
+                    className={`btn ${theme === 'dark' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    onClick={() => handleThemeChange('dark')}
+                    title="Dark theme"
+                  >
+                    🌙 Dark
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

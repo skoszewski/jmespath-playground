@@ -93,3 +93,25 @@ code {
   background-color: #e7f3ff;
   border-color: #b3d7ff;
 }
+
+/* Dark mode support for error states */
+@media (prefers-color-scheme: dark) {
+  .error {
+    background-color: #4a1e1e !important;
+    border-color: #6d2c2c !important;
+    color: #f8d7da !important;
+  }
+}
+
+/* Manual theme overrides for error states */
+.theme-dark .error {
+  background-color: #4a1e1e !important;
+  border-color: #6d2c2c !important;
+  color: #f8d7da !important;
+}
+
+.theme-light .error {
+  background-color: #f8d7da !important;
+  border-color: #f5c6cb !important;
+  color: #721c24 !important;
+}
