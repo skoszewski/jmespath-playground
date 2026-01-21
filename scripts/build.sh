@@ -43,9 +43,9 @@ if command -v docker &> /dev/null; then
         docker build \
             --build-arg VERSION="$VERSION" \
             --build-arg IS_RELEASE="true" \
-            -t jmespath-playground:$VERSION \
-            -t jmespath-playground:latest .
-        echo "✅ Built Docker images: jmespath-playground:$VERSION, jmespath-playground:latest"
+            -t skoszewski/jmespath-playground:$VERSION \
+            -t skoszewski/jmespath-playground:latest .
+        echo "✅ Built Docker images: skoszewski/jmespath-playground:$VERSION, skoszewski/jmespath-playground:latest"
     else
         # Development build
         PACKAGE_VERSION=$(grep '"version"' package.json | cut -d'"' -f4)
@@ -54,9 +54,9 @@ if command -v docker &> /dev/null; then
         docker build \
             --build-arg VERSION="$DEV_VERSION" \
             --build-arg IS_RELEASE="false" \
-            -t jmespath-playground:dev \
-            -t jmespath-playground:latest .
-        echo "✅ Built Docker images: jmespath-playground:dev, jmespath-playground:latest"
+            -t skoszewski/jmespath-playground:dev \
+            -t skoszewski/jmespath-playground:latest .
+        echo "✅ Built Docker images: skoszewski/jmespath-playground:dev, skoszewski/jmespath-playground:latest"
     fi
 else
     echo "💡 Docker not found. Container build is optional."
@@ -70,9 +70,9 @@ echo "  npm run server         # Run integrated server locally"
 if command -v docker &> /dev/null; then
     VERSION=$(git tag --points-at HEAD 2>/dev/null | sed 's/^v//' | head -n 1)
     if [ -n "$VERSION" ]; then
-        echo "  docker run -p 3000:3000 jmespath-playground:$VERSION  # Run release container"
+        echo "  docker run -p 3000:3000 skoszewski/jmespath-playground:$VERSION  # Run release container"
     else
-        echo "  docker run -p 3000:3000 jmespath-playground:dev      # Run dev container"
+        echo "  docker run -p 3000:3000 skoszewski/jmespath-playground:dev      # Run dev container"
     fi
-    echo "  docker run -p 3000:3000 jmespath-playground:latest      # Run latest container"
+    echo "  docker run -p 3000:3000 skoszewski/jmespath-playground:latest      # Run latest container"
 fi
