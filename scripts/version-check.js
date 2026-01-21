@@ -16,7 +16,9 @@ try {
   const gitTag = execSync('git tag --points-at HEAD', { encoding: 'utf8' }).trim();
 
   if (gitTag) {
-    // We're at a tagged commit - use clean version
+    // We're at a tagged commit - extract version from tag
+    const tagVersion = gitTag.replace(/^v/, ''); // Remove 'v' prefix if present
+    version = tagVersion;
     console.log(`✅ Building release version ${version} (tagged: ${gitTag})`);
     isRelease = true;
   } else {
