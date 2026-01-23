@@ -93,3 +93,17 @@ The application exposes a REST API for remotly uploading sample data. The API en
 ## Containerization
 
 The application should be prepared for deployment using containerization. It should extend minimal Node 24 LTS container image.
+
+## Updates
+
+Always use `scripts/new-version.js` script to make a new release.
+
+Correct procedure to make a new release:
+
+- Review the code changes and ensure everything is working.
+- Run `npm run build` to build the React application.
+- Run `npm test` to execute the test suite and ensure all tests pass.
+- Prepare a commit message describing the changes made.
+- Use `scripts/new-version.js` to create a new version and commit the changes. Use `--force` option if repository is not clean.
+- Don't push the changes without approval.
+- Don't build docker image without approval.
