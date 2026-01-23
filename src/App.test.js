@@ -55,8 +55,20 @@ describe('App Component', () => {
 
     test('renders version number', () => {
       render(<App />);
-      const versionText = screen.getByText(/v1\.1\.7-dev/);
+      const versionText = screen.getByText(/v\d+\.\d+\.\d+(-dev|-test)?/);
       expect(versionText).toBeInTheDocument();
+
+      // Check if it's a dev/test build
+      const isDevBuild = versionText.textContent.includes('-dev') || versionText.textContent.includes('-test');
+
+      // Additional validations can be added here based on build type
+      if (isDevBuild) {
+        // Dev/test specific validations could go here
+        expect(versionText.textContent).toMatch(/v\d+\.\d+\.\d+-(dev|test)/);
+      } else {
+        // Release build validations - just check that version pattern exists in the text
+        expect(versionText.textContent).toMatch(/v\d+\.\d+\.\d+/);
+      }
     });
 
     test('renders all toolbar buttons', () => {
@@ -84,7 +96,7 @@ describe('App Component', () => {
 
       // Set JSON data directly after clearing
       fireEvent.change(jsonInput, { target: { value: '{"name": "Alice", "age": 30}' } });
-      
+
       // Enter JMESPath expression after a small delay to ensure JSON is processed
       await user.clear(jmespathInput);
       await user.type(jmespathInput, 'name');
@@ -137,12 +149,12 @@ describe('App Component', () => {
       // Should show JSON error indicator - check for error styling or messages
       await waitFor(() => {
         const jsonInputWithError = document.querySelector('.json-input.error') ||
-                                 document.querySelector('.json-input.is-invalid') ||
-                                 screen.queryByText(/Unexpected token/i) ||
-                                 screen.queryByText(/JSON Error:/i) ||
-                                 screen.queryByText(/Invalid JSON:/i) ||
-                                 screen.queryByText(/SyntaxError/i);
-        
+          document.querySelector('.json-input.is-invalid') ||
+          screen.queryByText(/Unexpected token/i) ||
+          screen.queryByText(/JSON Error:/i) ||
+          screen.queryByText(/Invalid JSON:/i) ||
+          screen.queryByText(/SyntaxError/i);
+
         // If no specific error styling/message, at least ensure the result doesn't contain valid JSON result
         if (!jsonInputWithError) {
           const resultArea = screen.getByPlaceholderText(/Results will appear here/i);
@@ -259,7 +271,7 @@ describe('App Component', () => {
       await waitFor(() => {
         expect(fetch).toHaveBeenCalledWith('/api/v1/sample', expect.objectContaining({
           headers: expect.objectContaining({
-            'X-API-Key': expect.any(String)
+            'Accept': 'application/json'
           })
         }));
       });

@@ -1,5 +1,4 @@
 import React from 'react';
-import { VERSION } from '../version';
 
 function Header({ theme, onThemeChange, currentPage, onPageChange }) {
   return (

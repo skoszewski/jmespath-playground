@@ -45,21 +45,12 @@ function App() {
 
   // Theme management
   useEffect(() => {
-    // Apply theme to document
     const applyTheme = (selectedTheme) => {
-      const root = document.documentElement;
-      const body = document.body;
-
-      // Clear existing theme classes from both html and body
-      root.className = '';
-      body.classList.remove('theme-light', 'theme-dark');
-
-      if (selectedTheme === 'light') {
-        body.classList.add('theme-light');
-      } else if (selectedTheme === 'dark') {
-        body.classList.add('theme-dark');
-      }
-      // 'auto' uses CSS media queries (no class needed)
+      const effectiveTheme = selectedTheme === 'auto' 
+        ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : selectedTheme;
+      
+      document.documentElement.setAttribute('data-bs-theme', effectiveTheme);
     };
 
     applyTheme(theme);
@@ -68,23 +59,18 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Check if we're running on localhost
-  const isRunningOnLocalhost = () => {
-    const hostname = window.location.hostname;
-    return hostname === 'localhost' || 
-           hostname === '127.0.0.1' || 
-           hostname.startsWith('127.') || 
-           hostname === '::1';
-  };
-
-  // Get headers for API requests (omit API key for localhost)
+  // Get headers for API requests
   const getApiHeaders = () => {
     const headers = {
       'Accept': 'application/json'
     };
     
     // Only send API key for non-localhost requests
-    if (!isRunningOnLocalhost()) {
+    // For localhost, let server use its default LOCALHOST_API_KEY
+    if (window.location.hostname !== 'localhost' && 
+        window.location.hostname !== '127.0.0.1' && 
+        !window.location.hostname.startsWith('127.') && 
+        window.location.hostname !== '::1') {
       headers['X-API-Key'] = apiKey;
     }
     
@@ -116,7 +102,6 @@ function App() {
       }
     } catch (error) {
       // Silently handle state check errors
-      console.log('State check failed:', error);
     }
   };
 
@@ -132,7 +117,6 @@ function App() {
         const data = await response.json();
         if (data) {
           setSampleData(data);
-          console.log('Sample data loaded:', data);
         }
 
         // Update current state GUID
