@@ -1,35 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import jmespath from 'jmespath';
-import { VERSION } from './version';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import MainPage from './components/MainPage';
+import ApiKeyPage from './components/ApiKeyPage';
 import './App.css';
+
+// Utility function to generate a cryptographically secure API key
+function generateApiKey() {
+  const array = new Uint8Array(16);
+  
+  // Use crypto.getRandomValues if available (browser), fallback for tests
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(array);
+  } else {
+    // Fallback for test environments - not cryptographically secure
+    for (let i = 0; i < array.length; i++) {
+      array[i] = Math.floor(Math.random() * 256);
+    }
+  }
+  
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
 
 // JMESPath Testing Tool - Main Application Component
 function App() {
-  const [jmespathExpression, setJmespathExpression] = useState('people[0].name');
+  const [currentPage, setCurrentPage] = useState('main'); // 'main' or 'apikey'
   const [theme, setTheme] = useState(() => {
     // Load theme from localStorage or default to 'auto'
     return localStorage.getItem('theme') || 'auto';
   });
-  const [jsonData, setJsonData] = useState(`{
-  "people": [
-    {
-      "name": "John Doe",
-      "age": 30,
-      "city": "New York"
-    },
-    {
-      "name": "Jane Smith",
-      "age": 25,
-      "city": "Los Angeles"
-    }
-  ],
-  "total": 2
-}`);
-  const [result, setResult] = useState('');
-  const [error, setError] = useState('');
-  const [jsonError, setJsonError] = useState('');
   const [showReloadButton, setShowReloadButton] = useState(false);
   const [currentStateGuid, setCurrentStateGuid] = useState(null);
+  const [sampleData, setSampleData] = useState(null);
+  const [apiKey, setApiKey] = useState(() => {
+    // Load API key from localStorage or generate new one
+    const stored = localStorage.getItem('jmespath-api-key');
+    if (stored && /^[0-9a-f]{32}$/i.test(stored)) {
+      return stored;
+    }
+    const newKey = generateApiKey();
+    localStorage.setItem('jmespath-api-key', newKey);
+    return newKey;
+  });
 
   // Theme management
   useEffect(() => {
@@ -51,63 +63,82 @@ function App() {
     };
 
     applyTheme(theme);
+    
+    // Save theme preference
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // API polling for state changes and initial sample data load
-  useEffect(() => {
-    // Initial load: get both state and sample data
-    const loadInitialData = async () => {
-      try {
-        // Load sample data first
-        const sampleResponse = await fetch('/api/v1/sample');
-        if (sampleResponse.ok) {
-          const sampleData = await sampleResponse.json();
-          setJsonData(JSON.stringify(sampleData, null, 2));
-        }
+  // Check if we're running on localhost
+  const isRunningOnLocalhost = () => {
+    const hostname = window.location.hostname;
+    return hostname === 'localhost' || 
+           hostname === '127.0.0.1' || 
+           hostname.startsWith('127.') || 
+           hostname === '::1';
+  };
 
-        // Then load state GUID
-        const stateResponse = await fetch('/api/v1/state');
-        if (stateResponse.ok) {
-          const stateData = await stateResponse.json();
-          setCurrentStateGuid(stateData.state);
-        }
-      } catch (error) {
-        console.debug('API not available:', error);
-      }
+  // Get headers for API requests (omit API key for localhost)
+  const getApiHeaders = () => {
+    const headers = {
+      'Accept': 'application/json'
     };
+    
+    // Only send API key for non-localhost requests
+    if (!isRunningOnLocalhost()) {
+      headers['X-API-Key'] = apiKey;
+    }
+    
+    return headers;
+  };
 
-    loadInitialData();
+  // Load sample data from API on startup and setup periodic state checking
+  useEffect(() => {
+    loadSampleData();
 
-    // Poll for state changes every 3 seconds
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch('/api/v1/state');
-        if (response.ok) {
-          const data = await response.json();
-          if (currentStateGuid && data.state !== currentStateGuid) {
-            setShowReloadButton(true);
-          }
-        }
-      } catch (error) {
-        console.debug('API not available:', error);
-      }
-    }, 3000);
-
+    // Check for state changes every 5 seconds
+    const interval = setInterval(checkStateChange, 5000);
     return () => clearInterval(interval);
-  }, [currentStateGuid]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey]);
+
+  // Check if state has changed (new data uploaded)
+  const checkStateChange = async () => {
+    try {
+      const response = await fetch('/api/v1/state', {
+        headers: getApiHeaders()
+      });
+      
+      if (response.ok) {
+        const stateData = await response.json();
+        if (stateData.state && stateData.state !== currentStateGuid) {
+          setShowReloadButton(true);
+        }
+      }
+    } catch (error) {
+      // Silently handle state check errors
+      console.log('State check failed:', error);
+    }
+  };
 
   // Load sample data from API
   const loadSampleData = async () => {
     try {
       setShowReloadButton(false);
-      const response = await fetch('/api/v1/sample');
+      const response = await fetch('/api/v1/sample', {
+        headers: getApiHeaders()
+      });
+      
       if (response.ok) {
         const data = await response.json();
-        setJsonData(JSON.stringify(data, null, 2));
+        if (data) {
+          setSampleData(data);
+          console.log('Sample data loaded:', data);
+        }
 
         // Update current state GUID
-        const stateResponse = await fetch('/api/v1/state');
+        const stateResponse = await fetch('/api/v1/state', {
+          headers: getApiHeaders()
+        });
         if (stateResponse.ok) {
           const stateData = await stateResponse.json();
           setCurrentStateGuid(stateData.state);
@@ -118,367 +149,50 @@ function App() {
     }
   };
 
+  // Regenerate API key
+  const regenerateApiKey = () => {
+    const newKey = generateApiKey();
+    setApiKey(newKey);
+    localStorage.setItem('jmespath-api-key', newKey);
+    setShowReloadButton(false);
+    setCurrentStateGuid(null);
+  };
+
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
   };
 
-  const evaluateExpression = () => {
-    try {
-      // Clear previous errors
-      setError('');
-      setJsonError('');
-
-      // Validate and parse JSON
-      let parsedData;
-      try {
-        parsedData = JSON.parse(jsonData);
-      } catch (jsonErr) {
-        setJsonError(`Invalid JSON: ${jsonErr.message}`);
-        setResult('');
-        return;
-      }
-
-      // Evaluate JMESPath expression
-      const queryResult = jmespath.search(parsedData, jmespathExpression);
-
-      // Format the result
-      if (queryResult === null || queryResult === undefined) {
-        setResult('null');
-      } else {
-        setResult(JSON.stringify(queryResult, null, 2));
-      }
-    } catch (jmesErr) {
-      setError(`JMESPath Error: ${jmesErr.message}`);
-      setResult('');
-    }
-  };
-
-  // Auto-evaluate when inputs change
-  useEffect(() => {
-    if (jmespathExpression && jsonData) {
-      evaluateExpression();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jmespathExpression, jsonData]);
-
-  const handleJmespathChange = (e) => {
-    setJmespathExpression(e.target.value);
-  };
-
-  const handleJsonChange = (e) => {
-    setJsonData(e.target.value);
-  };
-
-  const formatJson = () => {
-    try {
-      const parsed = JSON.parse(jsonData);
-      setJsonData(JSON.stringify(parsed, null, 2));
-    } catch (err) {
-      // If JSON is invalid, don't format
-    }
-  };
-
-  const clearAll = () => {
-    setJmespathExpression('');
-    setJsonData('');
-    setResult('');
-    setError('');
-    setJsonError('');
-  };
-
-  const loadSample = () => {
-    setJmespathExpression('people[*].name');
-    setJsonData(`{
-  "people": [
-    {
-      "name": "Alice Johnson",
-      "age": 28,
-      "city": "Chicago",
-      "skills": ["JavaScript", "React", "Node.js"]
-    },
-    {
-      "name": "Bob Wilson",
-      "age": 35,
-      "city": "Seattle",
-      "skills": ["Python", "Django", "PostgreSQL"]
-    },
-    {
-      "name": "Carol Davis",
-      "age": 32,
-      "city": "Austin",
-      "skills": ["Java", "Spring", "MySQL"]
-    }
-  ],
-  "total": 3,
-  "department": "Engineering"
-}`);
-  };
-
-  const loadFromDisk = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.json';
-    fileInput.onchange = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const content = e.target.result;
-            // Handle .json files as regular JSON
-            JSON.parse(content); // Validate JSON
-            setJsonData(content);
-            setJsonError('');
-          } catch (err) {
-            setJsonError(`Invalid JSON file: ${err.message}`);
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    fileInput.click();
-  };
-
-  const loadLogFile = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.log';
-    fileInput.onchange = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const content = e.target.result;
-            const lines = content.split('\n')
-              .map(line => line.trim())
-              .filter(line => line.length > 0);
-
-            const jsonObjects = [];
-            for (const line of lines) {
-              try {
-                const obj = JSON.parse(line);
-                jsonObjects.push(obj);
-              } catch (lineError) {
-                throw new Error(`Invalid JSON on line: "${line.substring(0, 50)}..." - ${lineError.message}`);
-              }
-            }
-
-            const jsonContent = JSON.stringify(jsonObjects, null, 2);
-            setJsonData(jsonContent);
-            setJsonError('');
-          } catch (err) {
-            setJsonError(`Invalid log file: ${err.message}`);
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    fileInput.click();
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   return (
     <div className="container-fluid vh-100 d-flex flex-column">
-      {/* Top Section: Title only */}
-      <div className="header-section py-2">
-        <div className="container">
-          <div className="row">
-            <div className="col-12 text-center position-relative">
-              <h2 className="mb-1">JMESPath Testing Tool</h2>
-              {/* Theme switcher */}
-              <div className="position-absolute top-0 end-0">
-                <div className="btn-group btn-group-sm" role="group" aria-label="Theme switcher">
-                  <button
-                    type="button"
-                    className={`btn ${theme === 'auto' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                    onClick={() => handleThemeChange('auto')}
-                    title="Auto (follow system)"
-                  >
-                    🌓 Auto
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn ${theme === 'light' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                    onClick={() => handleThemeChange('light')}
-                    title="Light theme"
-                  >
-                    ☀️ Light
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn ${theme === 'dark' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                    onClick={() => handleThemeChange('dark')}
-                    title="Dark theme"
-                  >
-                    🌙 Dark
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Header 
+        theme={theme}
+        onThemeChange={handleThemeChange}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
 
       {/* Main Content Section - flex-grow to fill space */}
       <div className="container-fluid flex-grow-1 d-flex flex-column" style={{ minHeight: 0 }}>
-        {/* Description paragraph */}
-        <div className="row mb-2">
-          <div className="col-12">
-            <p className="text-muted text-center mb-2 small">
-              Validate and test JMESPath expressions against JSON data in real-time.
-              Enter your JMESPath query and JSON data below to see the results instantly.
-            </p>
-          </div>
-        </div>
-
-        {/* Middle Section: JMESPath Expression Input */}
-        <div className="row mb-2">
-          <div className="col-12">
-            <div className="card">
-              <div className="card-header d-flex justify-content-between align-items-center py-2">
-                <h6 className="mb-0">
-                  <i className="bi bi-search me-2"></i>
-                  JMESPath Expression
-                </h6>
-                <div>
-                  <button
-                    className="btn btn-outline-success btn-sm me-2"
-                    onClick={loadFromDisk}
-                    title="Load JSON object from file"
-                  >
-                    📄 Load an Object
-                  </button>
-                  <button
-                    className="btn btn-outline-info btn-sm me-2"
-                    onClick={loadLogFile}
-                    title="Load JSON Lines log file"
-                  >
-                    📋 Load a Log File
-                  </button>
-                  <button
-                    className="btn btn-outline-primary btn-sm me-2"
-                    onClick={loadSample}
-                    title="Load sample data"
-                  >
-                    Load Sample
-                  </button>
-                  <button
-                    className="btn btn-outline-secondary btn-sm me-2"
-                    onClick={formatJson}
-                    title="Format JSON input for better readability"
-                  >
-                    Format JSON
-                  </button>
-                  <button
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={clearAll}
-                    title="Clear all inputs"
-                  >
-                    Clear All
-                  </button>
-                </div>
-              </div>
-              <div className="card-body">
-                <input
-                  type="text"
-                  className={`form-control jmespath-input ${error ? 'error' : 'success'}`}
-                  value={jmespathExpression}
-                  onChange={handleJmespathChange}
-                  placeholder="Enter JMESPath expression (e.g., people[*].name)"
-                />
-                <div className={`alert mt-2 mb-0 d-flex justify-content-between align-items-center ${error ? 'alert-danger' : 'alert-success'}`}>
-                  <small className="mb-0">{error || 'Expression is correct'}</small>
-                  {showReloadButton && (
-                    <button
-                      className="btn btn-light btn-sm ms-2 border"
-                      onClick={loadSampleData}
-                      title="New sample data is available"
-                    >
-                      <i className="bi bi-arrow-clockwise me-1"></i>
-                      Reload Sample Data
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Lower Middle Sections: JSON Data (left) and Query Result (right) */}
-        <div className="row flex-grow-1" style={{ minHeight: 0 }}>
-          {/* Lower Middle Left Section: JSON Data Input */}
-          <div className="col-md-6">
-            <div className="card h-100">
-              <div className="card-header py-2">
-                <h6 className="mb-0">
-                  <i className="bi bi-file-code me-2"></i>
-                  JSON Data
-                </h6>
-              </div>
-              <div className="card-body d-flex flex-column" style={{ minHeight: 0 }}>
-                <div className="flex-grow-1" style={{ minHeight: 0 }}>
-                  <textarea
-                    className="form-control h-100 json-input"
-                    value={jsonData}
-                    onChange={handleJsonChange}
-                    placeholder="Enter JSON data here..."
-                    style={{ minHeight: 0, resize: 'none' }}
-                  />
-                </div>
-                {jsonError && (
-                  <div className="alert alert-danger mt-1 mb-0 py-1">
-                    <small>{jsonError}</small>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Lower Middle Right Section: Query Results Output */}
-          <div className="col-md-6">
-            <div className="card h-100">
-              <div className="card-header py-2">
-                <h6 className="mb-0">
-                  <i className="bi bi-arrow-right-circle me-2"></i>
-                  Query Result
-                </h6>
-              </div>
-              <div className="card-body d-flex flex-column" style={{ minHeight: 0 }}>
-                <div className="flex-grow-1" style={{ minHeight: 0 }}>
-                  <textarea
-                    className="form-control h-100 result-output"
-                    value={result}
-                    readOnly
-                    placeholder="Results will appear here..."
-                    style={{ minHeight: 0, resize: 'none' }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {currentPage === 'main' ? (
+          <MainPage 
+            apiKey={apiKey}
+            showReloadButton={showReloadButton}
+            onReloadSampleData={loadSampleData}
+            initialSampleData={sampleData}
+          />
+        ) : (
+          <ApiKeyPage 
+            apiKey={apiKey}
+            onRegenerateApiKey={regenerateApiKey}
+          />
+        )}
       </div>
 
-      {/* Bottom Section: Footer */}
-      <footer className="bg-light border-top mt-2 py-2 flex-shrink-0">
-        <div className="container">
-          <div className="row">
-            <div className="col-md-6">
-              <p className="mb-0 text-muted small">
-                <strong>JMESPath Testing Tool</strong> v{VERSION} - Created for testing and validating JMESPath expressions
-              </p>
-            </div>
-            <div className="col-md-6 text-md-end">
-              <p className="mb-0 text-muted small">
-                Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="text-decoration-none">MIT License</a> |
-                <a href="https://jmespath.org/" target="_blank" rel="noopener noreferrer" className="text-decoration-none ms-2">
-                  Learn JMESPath
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

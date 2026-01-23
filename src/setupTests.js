@@ -13,6 +13,19 @@ if (typeof TextDecoder === 'undefined') {
   global.TextDecoder = require('util').TextDecoder;
 }
 
+// Mock crypto.getRandomValues for test environment
+if (typeof global.crypto === 'undefined') {
+  global.crypto = {
+    getRandomValues: (array) => {
+      // Simple predictable mock for testing
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256);
+      }
+      return array;
+    }
+  };
+}
+
 // Suppress console errors during tests
 const originalError = console.error;
 beforeAll(() => {
