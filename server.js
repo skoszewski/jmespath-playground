@@ -1,7 +1,9 @@
 const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
+const os = require('os');
 const { v4: uuidv4 } = require('uuid');
+const { parseArgs } = require('util');
 
 // Environment configuration
 const MAX_SESSIONS = parseInt(process.env.MAX_SESSIONS) || 100;
@@ -16,21 +18,21 @@ function generateSalt() {
 function isLocalhostRequest(req) {
   // Get client IP with fallback options
   const forwarded = req.get('X-Forwarded-For');
-  const ip = forwarded ? forwarded.split(',')[0].trim() : 
-             req.ip || 
-             req.connection.remoteAddress || 
-             req.socket.remoteAddress || 
+  const ip = forwarded ? forwarded.split(',')[0].trim() :
+             req.ip ||
+             req.connection.remoteAddress ||
+             req.socket.remoteAddress ||
              '127.0.0.1';
-  
+
   const host = req.get('host') || '';
-  
+
   // Check for localhost IP addresses (IPv4 and IPv6)
   const localhostIPs = ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'localhost'];
   const isLocalIP = localhostIPs.includes(ip) || ip.startsWith('127.') || ip === '::1';
-  
+
   // Check for localhost hostnames
   const isLocalHost = host.startsWith('localhost:') || host.startsWith('127.0.0.1:') || host === 'localhost' || host === '127.0.0.1';
-  
+
   return isLocalIP || isLocalHost;
 }
 
@@ -40,12 +42,12 @@ function encrypt(data, key) {
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(algorithm, key, iv);
     cipher.setAAD(Buffer.from('session-data'));
-    
+
     let encrypted = cipher.update(JSON.stringify(data), 'utf8');
     encrypted = Buffer.concat([encrypted, cipher.final()]);
-    
+
     const authTag = cipher.getAuthTag();
-    
+
     return {
       iv: iv.toString('hex'),
       data: encrypted.toString('hex'),
@@ -69,10 +71,10 @@ function decrypt(encryptedObj, key) {
     const decipher = crypto.createDecipheriv(algorithm, key, iv);
     decipher.setAAD(Buffer.from('session-data'));
     decipher.setAuthTag(Buffer.from(encryptedObj.tag, 'hex'));
-    
+
     let decrypted = decipher.update(Buffer.from(encryptedObj.data, 'hex'), null, 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return JSON.parse(decrypted);
   } catch (error) {
     console.error('⚠️ Decryption exception:', {
@@ -141,7 +143,7 @@ function createApp() {
       // Check if request is from localhost - if so, skip API key validation
       const isFromLocalhost = isLocalhostRequest(req);
       let apiKey = req.headers['x-api-key'];
-      
+
       if (!isFromLocalhost) {
         // Validate API key header for remote clients
         if (!apiKey || !isValidApiKey(apiKey)) {
@@ -159,7 +161,7 @@ function createApp() {
 
       // Check session limits
       if (sessions.size >= MAX_SESSIONS) {
-        return res.status(429).json({ 
+        return res.status(429).json({
           error: 'Maximum number of sessions reached. Please try again later.',
           maxSessions: MAX_SESSIONS,
           currentSessions: sessions.size
@@ -176,7 +178,7 @@ function createApp() {
       // Check data size
       const dataSize = Buffer.byteLength(JSON.stringify(uploadedData), 'utf8');
       if (dataSize > MAX_SAMPLE_SIZE) {
-        return res.status(413).json({ 
+        return res.status(413).json({
           error: 'Sample data too large',
           maxSize: MAX_SAMPLE_SIZE,
           receivedSize: dataSize
@@ -190,7 +192,7 @@ function createApp() {
 
       // Encrypt and store session data
       const encryptedData = encrypt(uploadedData, key);
-      
+
       sessions.set(sessionId, {
         salt: salt.toString('hex'),
         encryptedData,
@@ -201,8 +203,8 @@ function createApp() {
 
       console.log(`📁 Session created: ${sessionId.substring(0, 8)}... (${sessions.size}/${MAX_SESSIONS})`);
 
-      res.json({ 
-        message: 'Sample data uploaded successfully', 
+      res.json({
+        message: 'Sample data uploaded successfully',
         state: stateGuid,
         sessionId: sessionId.substring(0, 8) + '...'
       });
@@ -213,25 +215,25 @@ function createApp() {
         sessionCount: sessions.size,
         timestamp: new Date().toISOString()
       });
-      
+
       // Provide more specific error messages based on error type
       if (error.name === 'SyntaxError') {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Invalid JSON data format',
           details: 'The uploaded data could not be parsed as valid JSON'
         });
       } else if (error.message.includes('encrypt')) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Encryption failed',
           details: 'Failed to encrypt session data. Please try again with a new API key.'
         });
       } else if (error.message.includes('PBKDF2')) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Key derivation failed',
           details: 'Failed to derive encryption key from API key'
         });
       } else {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Upload processing failed',
           details: 'An unexpected error occurred while processing your upload. Please try again.'
         });
@@ -244,7 +246,7 @@ function createApp() {
       // Check if request is from localhost - if so, skip API key validation
       const isFromLocalhost = isLocalhostRequest(req);
       let apiKey = req.headers['x-api-key'];
-      
+
       if (!isFromLocalhost) {
         // Validate API key header for remote clients
         if (!apiKey || !isValidApiKey(apiKey)) {
@@ -281,25 +283,25 @@ function createApp() {
         sessionCount: sessions.size,
         timestamp: new Date().toISOString()
       });
-      
+
       // Provide more specific error messages based on error type
       if (error.message.includes('decrypt')) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Decryption failed',
           details: 'Failed to decrypt session data. The session may be corrupted or the API key may be incorrect.'
         });
       } else if (error.message.includes('JSON')) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Data corruption detected',
           details: 'The stored session data appears to be corrupted and cannot be parsed.'
         });
       } else if (error.name === 'TypeError') {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Session data format error',
           details: 'The session data format is invalid or corrupted.'
         });
       } else {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Sample retrieval failed',
           details: 'An unexpected error occurred while retrieving sample data. The session may have been corrupted.'
         });
@@ -312,7 +314,7 @@ function createApp() {
       // Check if request is from localhost - if so, skip API key validation
       const isFromLocalhost = isLocalhostRequest(req);
       let apiKey = req.headers['x-api-key'];
-      
+
       if (!isFromLocalhost) {
         // Validate API key header for remote clients
         if (!apiKey || !isValidApiKey(apiKey)) {
@@ -341,15 +343,15 @@ function createApp() {
         sessionCount: sessions.size,
         timestamp: new Date().toISOString()
       });
-      
+
       // Provide more specific error messages
       if (error.message.includes('API key')) {
-        return res.status(403).json({ 
+        return res.status(403).json({
           error: 'API key processing failed',
           details: 'Failed to process the provided API key'
         });
       } else {
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'State retrieval failed',
           details: 'An unexpected error occurred while retrieving session state. Please try again.'
         });
@@ -357,9 +359,9 @@ function createApp() {
     }
   });
 
-  // Health endpoint (no auth required)
-  app.get('/api/v1/health', (req, res) => {
-    cleanupExpiredSessions(); // Cleanup on health check
+  // Status endpoint (no auth required) - detailed information
+  app.get('/api/v1/status', (req, res) => {
+    cleanupExpiredSessions(); // Cleanup on status check
     res.json({
       status: 'healthy',
       sessions: {
@@ -376,6 +378,11 @@ function createApp() {
     });
   });
 
+  // Health endpoint (no auth required) - simple OK response
+  app.get('/api/v1/health', (req, res) => {
+    res.type('text/plain').send('OK');
+  });
+
   // Serve React app for all other routes
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
@@ -386,37 +393,62 @@ function createApp() {
 
 // Start server if this file is run directly
 if (require.main === module) {
-  // Parse command line arguments
-  const args = process.argv.slice(2);
-  let listenAddr = process.env.LISTEN_ADDR || '127.0.0.1';
-  let listenPort = process.env.LISTEN_PORT || 3000;
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '-h' || args[i] === '--listen-addr') {
-      listenAddr = args[i + 1];
-      i++;
-    } else if (args[i] === '-p' || args[i] === '--port') {
-      listenPort = args[i + 1];
-      i++;
+  const { values } = parseArgs({
+    options: {
+      'listen-addr': { type: 'string', short: 'h', default: process.env.LISTEN_ADDR || '127.0.0.1' },
+      'port': { type: 'string', short: 'p', default: process.env.LISTEN_PORT || '3000' }
     }
-  }
+  });
 
   const app = createApp();
-  const PORT = parseInt(listenPort);
-  const HOST = listenAddr;
+  const PORT = parseInt(values.port);
+  const HOST = values['listen-addr'];
 
   app.listen(PORT, HOST, () => {
-    console.log(`🚀 JMESPath Playground Server running on http://${HOST}:${PORT}`);
-    console.log(`📊 Configuration:`);
+    console.log(`JMESPath Playground Server running`);
+
+    // Show actual accessible URLs
+    if (HOST === '0.0.0.0') {
+      console.log(`   Listening on all interfaces:`);
+      const interfaces = os.networkInterfaces();
+      for (const [name, addrs] of Object.entries(interfaces)) {
+        for (const addr of addrs) {
+          if (addr.family === 'IPv4' && !addr.internal) {
+            console.log(`   http://${addr.address}:${PORT}`);
+          }
+        }
+      }
+      // Also show localhost for local access
+      console.log(`   http://127.0.0.1:${PORT}`);
+    } else {
+      console.log(`   http://${HOST}:${PORT}`);
+    }
+
+    console.log(`Configuration:`);
     console.log(`   Max Sessions: ${MAX_SESSIONS}`);
     console.log(`   Max Sample Size: ${(MAX_SAMPLE_SIZE / 1024 / 1024).toFixed(1)}MB`);
     console.log(`   Session TTL: ${(MAX_SESSION_TTL / 1000 / 60).toFixed(0)} minutes`);
-    console.log(`🔗 API endpoints:`);
-    console.log(`   POST http://${HOST}:${PORT}/api/v1/upload (requires X-API-Key)`);
-    console.log(`   GET  http://${HOST}:${PORT}/api/v1/sample (requires X-API-Key)`);
-    console.log(`   GET  http://${HOST}:${PORT}/api/v1/state (requires X-API-Key)`);
-    console.log(`   GET  http://${HOST}:${PORT}/api/v1/health (public)`);
-    console.log(`🔐 Security: AES-256-GCM encryption with PBKDF2 key derivation`);
+
+    // Show base API URL
+    let apiBaseUrl;
+    if (HOST === '0.0.0.0') {
+      const interfaces = os.networkInterfaces();
+      let firstIP = '127.0.0.1';
+      outer: for (const addrs of Object.values(interfaces)) {
+        for (const addr of addrs) {
+          if (addr.family === 'IPv4' && !addr.internal) {
+            firstIP = addr.address;
+            break outer;
+          }
+        }
+      }
+      apiBaseUrl = `http://${firstIP}:${PORT}/api/v1`;
+    } else {
+      apiBaseUrl = `http://${HOST}:${PORT}/api/v1`;
+    }
+
+    console.log(`API Base URL: ${apiBaseUrl}`);
+    console.log(`Security: AES-256-GCM encryption with PBKDF2 key derivation`);
   });
 }
 

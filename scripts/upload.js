@@ -2,63 +2,57 @@
 
 /**
  * JMESPath Playground Upload Script (JavaScript)
- * Usage: node upload.js [-u URL] "json_file.json"
+ * Usage: node upload.js [-u URL] [-k API_KEY] "json_file.json"
  */
 
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
+const { parseArgs } = require('util');
 
 function showUsage() {
     const scriptName = path.basename(process.argv[1]);
-    console.log(`Usage: node ${scriptName} [-u|--url URL] <json_file>`);
+    console.log(`Usage: node ${scriptName} [-u|--url URL] [-k|--key API_KEY] <json_file>`);
     console.log('');
     console.log('Options:');
-    console.log('  -u, --url URL    API URL (default: http://localhost:3000)');
-    console.log('  -h, --help       Show this help message');
+    console.log('  -u, --url URL        API URL (default: http://localhost:3000)');
+    console.log('  -k, --key API_KEY    API key (not required for localhost)');
+    console.log('  -h, --help           Show this help message');
     console.log('');
-    console.log('Example:');
+    console.log('Examples:');
     console.log(`  node ${scriptName} data.json`);
-    console.log(`  node ${scriptName} -u http://example.com:3000 data.json`);
+    console.log(`  node ${scriptName} -u http://example.com:3000 -k your-api-key data.json`);
 }
 
-function parseArguments() {
-    const args = process.argv.slice(2);
-    let apiUrl = 'http://localhost:3000';
-    let jsonFile = '';
+function getArguments() {
+    const { values, positionals } = parseArgs({
+        args: process.argv.slice(2),
+        options: {
+            url: { type: 'string', short: 'u', default: 'http://localhost:3000' },
+            key: { type: 'string', short: 'k' },
+            help: { type: 'boolean', short: 'h' }
+        },
+        allowPositionals: true
+    });
 
-    for (let i = 0; i < args.length; i++) {
-        const arg = args[i];
-
-        if (arg === '-u' || arg === '--url') {
-            if (i + 1 >= args.length) {
-                console.error('Error: URL argument required for -u/--url option');
-                process.exit(1);
-            }
-            apiUrl = args[i + 1];
-            i++; // Skip next argument
-        } else if (arg === '-h' || arg === '--help') {
-            showUsage();
-            process.exit(0);
-        } else if (arg.startsWith('-')) {
-            console.error(`Error: Unknown option ${arg}`);
-            showUsage();
-            process.exit(1);
-        } else {
-            if (jsonFile) {
-                console.error('Error: Multiple JSON files specified');
-                process.exit(1);
-            }
-            jsonFile = arg;
-        }
+    if (values.help) {
+        showUsage();
+        process.exit(0);
     }
 
-    if (!jsonFile) {
+    if (positionals.length !== 1) {
         console.error('Error: JSON file required');
         showUsage();
         process.exit(1);
     }
 
-    return { apiUrl, jsonFile };
+    return {
+        apiUrl: values.url,
+        apiKey: values.key || '',
+        jsonFile: positionals[0]
+    };
 }
 
 async function validateJsonFile(jsonFile) {
@@ -80,28 +74,84 @@ async function validateJsonFile(jsonFile) {
     }
 }
 
-async function uploadData(apiUrl, jsonFile, jsonData) {
-    console.log('Uploading sample data to JMESPath Playground...');
-    console.log(`JSON file: ${jsonFile}`);
-    console.log(`API URL: ${apiUrl}`);
-    console.log('');
-
+function isLocalhost(url) {
     try {
-        const response = await fetch(`${apiUrl}/api/v1/upload`, {
+        const parsed = new URL(url);
+        const hostname = parsed.hostname;
+        return hostname === 'localhost' ||
+               hostname === '127.0.0.1' ||
+               hostname.startsWith('127.') ||
+               hostname === '::1';
+    } catch {
+        return false;
+    }
+}
+
+function makeRequest(url, options) {
+    return new Promise((resolve, reject) => {
+        const parsedUrl = new URL(url);
+        const isHttps = parsedUrl.protocol === 'https:';
+        const client = isHttps ? https : http;
+
+        const requestOptions = {
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port,
+            path: parsedUrl.pathname,
+            method: options.method || 'GET',
+            headers: options.headers || {}
+        };
+
+        const req = client.request(requestOptions, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                resolve({
+                    ok: res.statusCode >= 200 && res.statusCode < 300,
+                    status: res.statusCode,
+                    json: () => Promise.resolve(JSON.parse(data))
+                });
+            });
+        });
+
+        req.on('error', reject);
+
+        if (options.body) {
+            req.write(options.body);
+        }
+
+        req.end();
+    });
+}
+
+async function uploadData(apiUrl, apiKey, jsonFile, jsonData) {
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // Only send API key for non-localhost requests
+        const isLocal = isLocalhost(apiUrl);
+        if (!isLocal && apiKey) {
+            headers['X-API-Key'] = apiKey;
+        } else if (!isLocal && !apiKey) {
+            console.error('Error: API key required for non-localhost URLs');
+            console.error('Use -k/--key option to specify API key');
+            process.exit(1);
+        }
+
+        const response = await makeRequest(`${apiUrl}/api/v1/upload`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             body: jsonData
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`HTTP ${response.status}: ${errorData.error || 'Upload failed'}`);
         }
 
-        console.log('Sample data uploaded successfully!');
-        console.log(`Open ${apiUrl} in your browser to see the reload button.`);
-        console.log('You can then enter your JMESPath expression in the web interface.');
+        const result = await response.json();
+        console.log(JSON.stringify(result));
 
     } catch (error) {
         console.error('Error uploading data:', error.message);
@@ -110,9 +160,9 @@ async function uploadData(apiUrl, jsonFile, jsonData) {
 }
 
 async function main() {
-    const { apiUrl, jsonFile } = parseArguments();
+    const { apiUrl, apiKey, jsonFile } = getArguments();
     const jsonData = await validateJsonFile(jsonFile);
-    await uploadData(apiUrl, jsonFile, jsonData);
+    await uploadData(apiUrl, apiKey, jsonFile, jsonData);
 }
 
 // Run the script

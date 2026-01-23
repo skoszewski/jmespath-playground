@@ -8,7 +8,7 @@ function Footer() {
         <div className="row">
           <div className="col-md-6">
             <p className="mb-0 text-muted small">
-              <strong>JMESPath Testing Tool</strong> v{VERSION} - Created for testing and validating JMESPath expressions
+              <strong>JMESPath Testing Tool</strong> {VERSION === 'unknown' ? VERSION : `v${VERSION}`} - Created for testing and validating JMESPath expressions
             </p>
           </div>
           <div className="col-md-6 text-md-end">

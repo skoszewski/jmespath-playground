@@ -8,62 +8,53 @@ A React-based web application for testing and validating JMESPath expressions ag
 
 ## Features
 
-- 🎯 **Real-time Evaluation**: JMESPath expressions are evaluated instantly as you type
-- 📝 **JSON Validation**: Built-in JSON syntax validation and error reporting
-- 📁 **File Upload**: Load JSON data directly from local files (supports JSON Lines format for .log files)
-- 🎨 **Bootstrap UI**: Clean, responsive interface with Bootstrap styling
-- 🔄 **Sample Data**: Pre-loaded examples to get started quickly
-- 📱 **Responsive Design**: Works on desktop, tablet, and mobile devices
-- 🐳 **Docker Ready**: Containerized for easy deployment
-- ✅ **Error Handling**: Clear error messages for both JSON and JMESPath syntax issues
-
-## Application Layout
-
-The application is divided into three main sections:
-
-1. **Top Section**: Title and description of the tool
-2. **Middle Section**: Input area for JMESPath expressions
-3. **Bottom Sections**: 
-   - **Left**: JSON data input area
-   - **Right**: Query results output area
+- **Real-time Evaluation**: JMESPath expressions are evaluated instantly as you type
+- **File Upload**: Load JSON data directly from local files (supports JSON Lines format for .log files)
+- **Remote API**: Upload sample data remotely via REST API with encrypted sessions
+- **Container Ready**: Containerized for easy deployment
 
 ## Quick Start
 
 ### Prerequisites
 
 - Node.js 24 LTS or higher
-- npm or yarn package manager
+- npm package manager
 
 ### Local Development
 
 1. **Clone the repository**:
+
    ```bash
    git clone <repository-url>
    cd jmespath-playground
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Start the development server**:
+
    ```bash
    npm start
    ```
 
 4. **Open your browser** and navigate to `http://localhost:3000`
 
-### Container Deployment (Optional)
+### Container Deployment
 
-You can optionally run the application in a Docker container:
+You can optionally run the application in a container:
 
 ```bash
-# Build the Docker image
-docker build -t jmespath-playground .
+# Build the container image
+npm run build-image
 
-# Run the container
+# Run the container (Docker or Apple Container Tools)
 docker run -p 3000:3000 jmespath-playground
+# or
+container run -p 3000:3000 jmespath-playground
 ```
 
 ## Usage
@@ -82,93 +73,56 @@ docker run -p 3000:3000 jmespath-playground
    - Format JSON for better readability
    - Clear all inputs
 
-### Example JMESPath Expressions
+## Remote API Usage
 
-Try these examples with the sample data:
+The application includes a REST API for uploading sample data remotely:
 
-- `people[*].name` - Get all names
-- `people[0]` - Get the first person
-- `people[?age > 30]` - Filter people older than 30
-- `people[*].skills[0]` - Get the first skill of each person
-- `length(people)` - Count the number of people
+1. **Access API Key**: Click the key-lock button (🔒) to view your unique API key
+2. **Upload Data**: Use curl or any HTTP client to upload JSON data:
+   ```bash
+   curl -X POST \
+       -H "Content-Type: application/json" \
+       -H "X-API-Key: YOUR_API_KEY" \
+       --data @sample-data.json \
+       "http://your-domain.com/api/v1/upload"
+   ```
+3. **Auto-reload**: The running app will detect new data and show a reload button
 
-## Available Scripts
+**API Endpoints:**
+- `POST /api/v1/upload` - Upload sample data
+- `GET /api/v1/sample` - Retrieve current sample data
+- `GET /api/v1/state` - Get current state ID
+- `GET /api/v1/health` - Simple health check (returns "OK")
+- `GET /api/v1/status` - Detailed status information (JSON)
 
-In the project directory, you can run:
+## Server Configuration
 
-### `npm start`
+The server can be configured using environment variables:
 
-Runs the app in development mode. The page will reload when you make edits.
+**Network Settings:**
+- `LISTEN_ADDR` - Server bind address (default: `127.0.0.1`)
+- `LISTEN_PORT` - Server port (default: `3000`)
 
-### `npm test`
+**Session Management:**
+- `MAX_SESSIONS` - Maximum number of concurrent sessions (default: `100`)
+- `MAX_SAMPLE_SIZE` - Maximum size of uploaded sample data in bytes (default: `1048576` - 1MB)
+- `MAX_SESSION_TTL` - Session time-to-live in milliseconds (default: `3600000` - 1 hour)
 
-Launches the test runner in interactive watch mode.
+Example usage:
 
-### `npm run build`
-
-Builds the app for production to the `build` folder. It correctly bundles React in production mode and optimizes the build for the best performance.
-
-### `npm run serve`
-
-Serves the production build locally on port 3000.
-
-### Docker Scripts
-
-### `npm run docker:build`
-
-Builds a Docker container.
-
-### `npm run docker:run`
-
-Runs the Docker container.
-
-## Project Structure
-
-```
-jmespath-playground/
-├── .github/
-│   ├── workflows/
-│   │   └── build-container.yml   # CI/CD pipeline
-│   └── copilot-instructions.md   # AI agent instructions
-├── public/
-│   ├── index.html
-│   ├── manifest.json
-│   └── favicon.ico
-├── src/
-│   ├── App.js          # Main application component
-│   ├── App.css         # App-specific styles
-│   ├── App.test.js     # App tests
-│   ├── index.js        # React entry point
-│   ├── index.css       # Global styles
-│   ├── setupTests.js   # Test configuration
-│   └── reportWebVitals.js
-├── scripts/
-│   ├── build.sh        # Build script
-│   └── dev.sh          # Development script
-├── Dockerfile          # Docker container
-├── Dockerfile.dev      # Development container
-├── docker-compose.yml  # Container orchestration
-├── package.json        # Dependencies and scripts
-├── README.md           # Comprehensive documentation
-├── DEVELOPMENT.md      # Developer guide
-└── demo.sh             # Demo script
+```bash
+MAX_SESSIONS=200 MAX_SAMPLE_SIZE=2097152 LISTEN_PORT=8080 node server.js
 ```
 
 ## Technology Stack
 
-- **React 18.2.0**: Frontend framework
-- **Bootstrap 5.3.2**: CSS framework for styling
-- **JMESPath 0.16.0**: JMESPath expression evaluation
+- **React 18.2.0**: Frontend framework with modern hooks and components
+- **Bootstrap 5.3.2**: CSS framework with dark/light theme support
+- **JMESPath 0.16.0**: JMESPath expression evaluation library
+- **Express.js 4.19.2**: Backend API server with session management
 - **Node.js 24 LTS**: Runtime environment
-- **Docker**: Optional containerization
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/new-feature`
-3. Make your changes and commit them: `git commit -m 'Add new feature'`
-4. Push to the branch: `git push origin feature/new-feature`
-5. Submit a pull request
+- **UUID 9.0.0**: Cryptographically secure session IDs
+- **Container**: Containerization for easy deployment
 
 ## License
 
@@ -177,7 +131,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## About JMESPath
 
 JMESPath is a query language for JSON. It allows you to declaratively specify how to extract elements from a JSON document. For more information about JMESPath syntax and capabilities, visit the [official JMESPath website](https://jmespath.org/).
-
-## Support
-
-If you encounter any issues or have questions, please [open an issue](../../issues) on GitHub.

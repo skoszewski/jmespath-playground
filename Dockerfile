@@ -56,6 +56,10 @@ RUN npm ci --only=production && npm cache clean --force
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/server.js ./server.js
 
+# Copy entrypoint script
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
+
 # Expose port 3000
 EXPOSE 3000
 
@@ -64,4 +68,4 @@ ENV LISTEN_ADDR=0.0.0.0
 ENV LISTEN_PORT=3000
 
 # Start the integrated server
-CMD ["node", "server.js"]
+ENTRYPOINT ["./entrypoint.sh"]

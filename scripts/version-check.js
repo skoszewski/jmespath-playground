@@ -22,15 +22,15 @@ try {
     console.log(`✅ Building release version ${version} (tagged: ${gitTag})`);
     isRelease = true;
   } else {
-    // We're not at a tagged commit - add -dev suffix
-    version = `${version}-dev`;
-    console.log(`📦 Building development version ${version}`);
+    // We're not at a tagged commit - use unknown version
+    version = 'unknown';
+    console.log(`📦 Building development version with unknown version`);
     isRelease = false;
   }
 } catch (error) {
   // Git command failed (maybe not in a git repo)
-  version = `${version}-dev`;
-  console.log(`⚠️  Cannot determine git status, using development version ${version}`);
+  version = 'unknown';
+  console.log(`⚠️  Cannot determine git status, using unknown version`);
   isRelease = false;
 }
 

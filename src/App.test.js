@@ -55,16 +55,19 @@ describe('App Component', () => {
 
     test('renders version number', () => {
       render(<App />);
-      const versionText = screen.getByText(/v\d+\.\d+\.\d+(-dev|-test)?/);
+      // Version can be either v1.2.3 format (release), v1.2.3-dev/test format (legacy dev), or "unknown" format (new dev)
+      const versionText = screen.getByText(/(v\d+\.\d+\.\d+(-dev|-test)?|unknown)/);
       expect(versionText).toBeInTheDocument();
 
-      // Check if it's a dev/test build
-      const isDevBuild = versionText.textContent.includes('-dev') || versionText.textContent.includes('-test');
+      // Check if it's a dev/test/unknown build
+      const isDevBuild = versionText.textContent.includes('-dev') || 
+                        versionText.textContent.includes('-test') ||
+                        versionText.textContent.includes('unknown');
 
       // Additional validations can be added here based on build type
       if (isDevBuild) {
-        // Dev/test specific validations could go here
-        expect(versionText.textContent).toMatch(/v\d+\.\d+\.\d+-(dev|test)/);
+        // Dev/test/unknown specific validations
+        expect(versionText.textContent).toMatch(/(v\d+\.\d+\.\d+-(dev|test)|unknown)/);
       } else {
         // Release build validations - just check that version pattern exists in the text
         expect(versionText.textContent).toMatch(/v\d+\.\d+\.\d+/);
