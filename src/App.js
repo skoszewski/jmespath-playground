@@ -54,22 +54,30 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // API polling for state changes
+  // API polling for state changes and initial sample data load
   useEffect(() => {
-    // Initial state load
-    const loadInitialState = async () => {
+    // Initial load: get both state and sample data
+    const loadInitialData = async () => {
       try {
-        const response = await fetch('/api/v1/state');
-        if (response.ok) {
-          const data = await response.json();
-          setCurrentStateGuid(data.state);
+        // Load sample data first
+        const sampleResponse = await fetch('/api/v1/sample');
+        if (sampleResponse.ok) {
+          const sampleData = await sampleResponse.json();
+          setJsonData(JSON.stringify(sampleData, null, 2));
+        }
+
+        // Then load state GUID
+        const stateResponse = await fetch('/api/v1/state');
+        if (stateResponse.ok) {
+          const stateData = await stateResponse.json();
+          setCurrentStateGuid(stateData.state);
         }
       } catch (error) {
         console.debug('API not available:', error);
       }
     };
 
-    loadInitialState();
+    loadInitialData();
 
     // Poll for state changes every 3 seconds
     const interval = setInterval(async () => {

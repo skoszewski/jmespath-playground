@@ -51,7 +51,13 @@ function createApp() {
 
   app.get('/api/v1/sample', (req, res) => {
     try {
-      res.json(sampleData);
+      const dataToReturn = sampleData;
+
+      // Security: Clear the sample data after it's retrieved (one-time use)
+      sampleData = null;
+      console.log('📤 Sample data retrieved and cleared from server memory');
+
+      res.json(dataToReturn);
     } catch (error) {
       res.status(500).json({ error: 'Failed to retrieve sample data' });
     }
