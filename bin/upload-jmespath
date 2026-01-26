@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-JMESPATH_PLAYGROUND_API_URL="http://localhost:3000" # May be set in bash profile
-JMESPATH_PLAYGROUND_API_KEY="" # Required if not localhost
+JMESPATH_PLAYGROUND_API_URL="${JMESPATH_PLAYGROUND_API_URL:-http://localhost:3000}" # May be set in bash profile
+JMESPATH_PLAYGROUND_API_KEY="${JMESPATH_PLAYGROUND_API_KEY:-}" # Required if not localhost
 
 JSON_FILE="-"
 
