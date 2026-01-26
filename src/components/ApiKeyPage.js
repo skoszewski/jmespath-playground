@@ -64,33 +64,27 @@ function ApiKeyPage({ apiKey, onRegenerateApiKey }) {
               <h6>📡 Remote Data Upload API</h6>
               <p className="text-muted">
                 External tools can upload sample data remotely using the REST API.
-                For remote clients, the API key is required for authentication:
+                For remote clients, the API key is required for authentication. Define two
+                environment variables in your <code>.bashrc</code>.
               </p>
+              <pre className="bg-light p-3 rounded border">
+              <code>export JMESPATH_PLAYGROUND_API_URL={window.location.origin}<br/>export JMESPATH_PLAYGROUND_API_KEY={apiKey}</code>
+              </pre>
+              <p className="text-muted">Then, use the following <code>curl</code> command to upload your data:</p>
               <pre className="bg-light p-3 rounded border">
 <code>{`curl -s -X POST \\
     -H "Content-Type: application/json" \\
     -H "Accept: application/json" \\
-    -H "X-API-Key: ${apiKey}" \\
-    --data @{{JSON_FILE_NAME}} \\
-    "${window.location.origin}/api/v1/upload"`}</code>
+    -H "X-API-Key: $JMESPATH_PLAYGROUND_API_KEY" \\
+    --data @__JSON_FILE_NAME__ \\
+    "$\{JMESPATH_PLAYGROUND_API_URL}/api/v1/upload"`}</code>
               </pre>
               <div className="form-text">
-                Replace <code>{'{{JSON_FILE_NAME}}'}</code> with the path to your JSON file containing the sample data.
+                Replace <code>{'__JSON_FILE_NAME__'}</code> with the path to your JSON file containing the sample data.
+                or use <code>-</code> to read from standard input.
                 <br />
-                <strong>For localhost clients:</strong> The X-API-Key header is optional and can be omitted.
+                <strong>For localhost clients:</strong> The X-API-Key should be omitted.
               </div>
-            </div>
-
-            <div className="alert alert-info">
-              <h6 className="alert-heading">ℹ️ How it works:</h6>
-              <ul className="mb-0">
-                <li>Remote clients require API key authentication for security</li>
-                <li>Localhost clients (127.0.0.1) can access the API without authentication</li>
-                <li>Your data is encrypted using AES-256-GCM with PBKDF2 key derivation</li>
-                <li>Data is automatically cleared after first retrieval (one-time use)</li>
-                <li>Sessions expire after 1 hour for security</li>
-                <li>Maximum 100 concurrent sessions supported</li>
-              </ul>
             </div>
           </div>
         </div>

@@ -43,6 +43,16 @@ A React-based web application for testing and validating JMESPath expressions ag
 
 4. **Open your browser** and navigate to `http://localhost:3000`
 
+### Development
+
+For development with hot reload on component changes:
+
+```bash
+npm run dev
+```
+
+This runs both the React dev server (with hot reload) and the API server concurrently. The React app will proxy API requests to the backend server.
+
 ### Container Deployment
 
 You can optionally run the application in a container:

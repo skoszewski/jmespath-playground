@@ -72,7 +72,7 @@ function main() {
     // Show usage instructions
     if (isRelease) {
         console.log(`\nTo run the container:`);
-        console.log(`  ${containerTool} run -p 3000:3000 skoszewski/jmespath-playground:${version}`);
+        console.log(`  ${containerTool} run --name jmespathpg -p 3000:3000 skoszewski/jmespath-playground:${version}`);
         if (containerTool === 'docker') {
             console.log(`\nTo push to Docker Hub:`);
             console.log(`  docker push skoszewski/jmespath-playground:${version}`);
@@ -80,7 +80,7 @@ function main() {
         }
     } else {
         console.log(`\nTo run the container:`);
-        console.log(`  ${containerTool} run -p 3000:3000 skoszewski/jmespath-playground:dev`);
+        console.log(`  ${containerTool} run --name jmespathpg -p 3000:3000 skoszewski/jmespath-playground:dev`);
     }
 }
 

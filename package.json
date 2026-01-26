@@ -1,6 +1,6 @@
 {
   "name": "jmespath-playground",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "A React-based web application for testing JMESPath expressions against JSON data",
   "main": "index.js",
   "scripts": {
@@ -10,8 +10,10 @@
     "test": "react-scripts test --watchAll=false",
     "test:watch": "react-scripts test",
     "server": "node server.js",
+    "dev": "concurrently \"npm start\" \"npm run server\"",
     "build-image": "node scripts/build-image.js"
   },
+  "proxy": "http://localhost:3000",
   "engines": {
     "node": ">=24.0.0"
   },
@@ -61,6 +63,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "supertest": "^7.2.2"
   }
 }

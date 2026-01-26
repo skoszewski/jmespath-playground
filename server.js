@@ -110,7 +110,7 @@ function deriveKey(apiKey, salt) {
 }
 
 // Create Express app
-function createApp() {
+function createApp(devMode = false) {
   const app = express();
 
   // Trust proxy to get real client IP (needed for localhost detection)
@@ -119,6 +119,25 @@ function createApp() {
   // Middleware
   app.use(express.json({ limit: MAX_SAMPLE_SIZE }));
   app.use(express.static(path.join(__dirname, 'build')));
+
+  // Dev mode request logging middleware
+  if (devMode) {
+    app.use((req, res, next) => {
+      const timestamp = new Date().toISOString();
+      console.log(`📨 [${timestamp}] ${req.method} ${req.path}`);
+      if (req.method !== 'GET' && Object.keys(req.body).length > 0) {
+        const bodySize = Buffer.byteLength(JSON.stringify(req.body), 'utf8');
+        console.log(`   Request body size: ${(bodySize / 1024).toFixed(2)}KB`);
+      }
+      
+      const originalJson = res.json;
+      res.json = function(data) {
+        console.log(`   ✓ Response: ${res.statusCode}`);
+        return originalJson.call(this, data);
+      };
+      next();
+    });
+  }
 
   // Session storage
   const sessions = new Map();
@@ -396,16 +415,21 @@ if (require.main === module) {
   const { values } = parseArgs({
     options: {
       'listen-addr': { type: 'string', short: 'h', default: process.env.LISTEN_ADDR || '127.0.0.1' },
-      'port': { type: 'string', short: 'p', default: process.env.LISTEN_PORT || '3000' }
+      'port': { type: 'string', short: 'p', default: process.env.LISTEN_PORT || '3000' },
+      'dev': { type: 'boolean', default: process.env.DEV_MODE === 'true' || false }
     }
   });
 
-  const app = createApp();
+  const DEV_MODE = values.dev;
+  const app = createApp(DEV_MODE);
   const PORT = parseInt(values.port);
   const HOST = values['listen-addr'];
 
   app.listen(PORT, HOST, () => {
     console.log(`JMESPath Playground Server running`);
+    if (DEV_MODE) {
+      console.log(`   🔧 Development Mode Enabled`);
+    }
 
     // Show actual accessible URLs
     if (HOST === '0.0.0.0') {
