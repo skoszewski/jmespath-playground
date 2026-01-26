@@ -55,4 +55,4 @@ curl -s -X POST \
     -H "Accept: application/json" \
     "${ADD_HEADERS[@]}" \
     --data @${JSON_FILE} \
-    "$API_URL/api/v1/upload"
+    "$JMESPATH_PLAYGROUND_API_URL/api/v1/upload"
