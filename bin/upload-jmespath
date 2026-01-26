@@ -2,23 +2,33 @@
 
 set -euo pipefail
 
-API_URL="https://jmespath-playground.koszewscy.waw.pl"
+JMESPATH_PLAYGROUND_API_URL="http://localhost:3000" # May be set in bash profile
+JMESPATH_PLAYGROUND_API_KEY="" # Required if not localhost
+
 JSON_FILE="-"
-ADD_HEADERS=()
 
 function usage() {
     echo "Usage: $0 [--api-url <url>] [--json-file <file>]"
-    exit 1
+    echo
+    echo "Options:"
+    echo "  --api-url <url>        The base URL of the JMESPath Playground API (default: http://localhost:3000)"
+    echo "  --api-key <key>        The API key for authentication (required if not localhost)"
+    echo "  --json-file <file>     The JSON file to upload (default: stdin if not specified)"
+    echo "  -h, --help             Show this help message and exit"
+    echo
+    echo "Environment Variables:"
+    echo "  JMESPATH_PLAYGROUND_API_URL   Can be used to set the API URL"
+    echo "  JMESPATH_PLAYGROUND_API_KEY   Can be used to set the API key"
 }
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --api-url)
-            API_URL="$2"
+            JMESPATH_PLAYGROUND_API_URL="$2"
             shift 2
             ;;
         --api-key)
-            ADD_HEADERS+=("-H" "X-API-Key: $2")
+            JMESPATH_PLAYGROUND_API_KEY="$2"
             shift 2
             ;;
         --json-file)
@@ -37,6 +47,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+ADD_HEADERS+=("-H" "X-API-Key: $JMESPATH_PLAYGROUND_API_KEY")
+
 # Send the POST request
 curl -s -X POST \
     -H "Content-Type: application/json" \
@@ -44,4 +56,3 @@ curl -s -X POST \
     "${ADD_HEADERS[@]}" \
     --data @${JSON_FILE} \
     "$API_URL/api/v1/upload"
-
